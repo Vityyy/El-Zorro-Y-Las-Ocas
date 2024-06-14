@@ -65,7 +65,7 @@
     ;   2 ->    direccion del espacio en blanco (" ")
     ;   3 ->    direccion del vacio ("")
     
-    ;La macro deja en el rbx 
+    ;La macro deja en el rbx:
     ;   - 0 si la ficha es válida
     ;   - 1 si la ficha es inválida
 
@@ -91,10 +91,8 @@ finMacro:
 %endmacro
 global          main
 
-extern          printf
-extern          system
-extern          gets
-extern          puts
+extern          printf,system,gets,puts
+extern          mostrarMenu
 
 section         .data
     ; system
@@ -108,20 +106,20 @@ section         .data
 
     ; relacionado al juego
     ;zorro
-    zorro                       db      "X"
-    zorroPosCol                 dq      4
-    zorroPosFil                 dq      5
+    zorro               db      "X"
+    zorroPosCol         dq      4
+    zorroPosFil         dq      5
     
     ;ocas
     ocas                db      "O"
 
     ;Textos de configuracion
-    textConfiguracion       db      "Deseas configurar la partida (s/n): ",0
-    textConfiguracionZorro  db      "Escriba el caracter con el que quiere representar al zorro: ",0
-    textConfiguracionOcas   db      "Escriba el caracter con el que quiere representar las ocas: ",0
+    textConfiguracion           db      "Deseas configurar la partida (s/n): ",0
+    textConfiguracionZorro      db      "Escriba el caracter con el que quiere representar al zorro: ",0
+    textConfiguracionOcas       db      "Escriba el caracter con el que quiere representar las ocas: ",0
     textConfiguracionTablero    db      "Elija la orientacion en la que quiere ver el tablero: ",0
-    respuestaAfirmativa     db      "s"
-    respuestaNegativa       db      "n"
+    respuestaAfirmativa         db      "s"
+    respuestaNegativa           db      "n"
 
     ; imprimir por pantalla
     espacio                         db      " ",0
@@ -132,6 +130,8 @@ section         .data
     separadorHorizontalCortado      db      "       -------------        ",10,0
     saltoLinea                      db      "",10,0
 
+    ingreso1                    db  "Se ingreso 1",0
+
 section         .bss
     tablero         times 49        resb    1
 
@@ -139,10 +139,16 @@ section         .bss
     eleccionConfiguracion           resb    50      
     configuracionZorro              resb    50
     configuracionOcas               resb    50
-    configuracionTablero            resb    50              
+    configuracionTablero            resb    50      
+    nada resb 1        
 
 section         .text
 main:
+    sub         rsp,8
+    ;rutina externa que maneja la funcionalidad del menu
+    ;devuelve el resultado de la opcion escogida en el rax (numero)
+    call        mostrarMenu
+    add         rsp,8
 
     sub         rsp, 8
     call        configuracion
@@ -429,7 +435,6 @@ configurarOcas:
     rep     movsb
 
 configurarTablero:
-    
 
 finConfiguracion:
     ret
