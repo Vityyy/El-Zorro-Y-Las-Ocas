@@ -1,0 +1,209 @@
+%include "macros.asm"
+global Actividad_Tablero
+
+section .data
+    ; relacionado al tablero
+    CANT_COL            dq      7
+    LONG_ELEMEN         dq      1
+    posCol              dq      1
+    posFil              dq      1
+
+    ;imprimir por pantalla
+    espacio                         db      " ",0
+    vacio                           db      "",0
+    ficha                           db      " %c ", 0
+    separadorVertical               db      "|",0
+    separadorHorizontal             db      "----------------------------",10,0
+    separadorHorizontalCortado      db      "       -------------        ",10,0
+    saltoLinea                      db      "",10,0
+
+    ;posicion inicial del Zorro
+    zorroPosColInicial        dq      4
+    zorroPosFilInicial        dq      5
+
+section .bss
+    direc_tablero        resq 1
+    direc_caracter_zorro resq 1
+    direc_caracter_ocas  resq 1
+
+section .text
+Actividad_Tablero:
+    mov [direc_tablero],rsi
+    mov [direc_caracter_zorro],rdx
+    mov [direc_caracter_ocas],rcx
+
+    cmp rdi,1
+    je inicializarTablero
+
+    mov         qword[posFil], 0
+    mov         qword[posCol], 1
+    jmp mostrarTablero
+
+inicializarTablero:
+    ;subrutina que deja el tablero en su estdo inicial
+    
+ubicarOcas:
+    ;UBICO LAS OCAS
+
+    sub             rsp, 8
+    call            validarPosicion
+    add             rsp, 8
+    
+    ;si rbx = 1 significa que la posicion está fuera del rango del tablero
+    cmp         rbx, 1
+    je          espacioVacio
+
+    cmp         qword[posFil], 3
+    jle         ponerOcas
+
+    cmp         qword[posFil], 5
+    jle         ocasEnEsquinas
+
+espacioVacio:
+    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
+
+    _movsb      espacio, [direc_tablero], rdx    
+
+    jmp         avanzarInicializacion
+
+ocasEnEsquinas:
+    cmp         qword[posCol],1
+    je          ponerOcas
+
+    cmp         qword[posCol], 7
+    je          ponerOcas
+
+    jmp         espacioVacio
+
+ponerOcas:
+    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
+
+    _movsb      [direc_caracter_ocas], [direc_tablero], rdx
+
+avanzarInicializacion:
+    inc         qword[posCol]
+    cmp         qword[posCol], 7
+    jle         ubicarOcas
+
+    mov         qword[posCol], 1
+
+    inc         qword[posFil]    
+    cmp         qword[posFil], 7
+    jle         ubicarOcas
+
+    mov         qword[posFil], 1
+
+    buscarPosicion     zorroPosFilInicial, zorroPosColInicial, LONG_ELEMEN, CANT_COL
+
+    _movsb      [direc_caracter_zorro], [direc_tablero], rdx 
+    
+    ;return de inicializacion
+    jmp         fin
+
+;**********************************************************************
+
+mostrarTablero:
+   
+    cmp             qword[posFil], 0
+    je              separadorFilasCortado
+
+    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
+    mov             rdi, ficha
+    mov             r10,[direc_tablero]
+    mov             rsi, [r10 + rdx]
+    mPrintf
+
+    sub             rsp, 8
+    call            validarPosicion
+    add             rsp, 8
+    
+    cmp             rbx, 0
+    je              separadorColumnas
+
+    cmp             qword[posCol], 2
+    je              separadorColumnas
+
+    mov             rdi, espacio
+    mPrintf
+
+    jmp             avanzarMostrarTablero
+
+separadorColumnas:             
+    mov             rdi, separadorVertical
+    mPrintf
+
+avanzarMostrarTablero:
+    inc         qword[posCol]
+    cmp         qword[posCol], 7
+    jle         mostrarTablero
+
+    mov         rdi, saltoLinea
+    mPrintf
+
+    cmp         qword[posFil], 1
+    jle         separadorFilasCortado
+    
+    cmp         qword[posFil], 6
+    jge         separadorFilasCortado
+
+    mov         rdi, separadorHorizontal
+    mPrintf
+
+    jmp         avanzarFila
+
+separadorFilasCortado:
+    mov         rdi, separadorHorizontalCortado
+    mPrintf
+
+avanzarFila:
+    mov         qword[posCol], 1
+    inc         qword[posFil]
+    cmp         qword[posFil], 7
+    jle         mostrarTablero
+
+    ; return de mostrarTablero
+    jmp         fin
+
+;***************************************************************************
+
+validarPosicion:
+    ; guarda en el rdx:
+    ; -> 1 en caso de que la posicion no sea válida
+    ; -> 0 en caso de que sea válida
+
+    cmp         qword[posFil], 7
+    jg          invalido
+
+    cmp         qword[posCol], 7
+    jg          invalido
+
+    cmp         qword[posCol], 3
+    jl          filaCortada
+
+    cmp         qword[posCol], 5
+    jg          filaCortada
+
+    jmp         valido
+
+filaCortada:
+    cmp         qword[posFil], 3
+    jl          invalido
+
+    cmp         qword[posFil], 5
+    jg          invalido
+
+    jmp         valido
+invalido:
+    mov         rbx, 1
+    jmp         finValidacion
+
+valido:
+    mov         rbx, 0
+    jmp         finValidacion
+
+finValidacion:
+    ;return de validacion
+    ret
+
+fin:
+    ret

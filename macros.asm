@@ -10,10 +10,10 @@
     add rsp,8
 %endmacro
 
-%macro      mPrintf 0
-    sub         rsp, 8
-    call        printf
-    add         rsp, 8
+%macro mPrintf 0
+    sub  rsp, 8
+    call printf
+    add  rsp, 8
 %endmacro
 
 %macro mSscanf 0
@@ -65,5 +65,6 @@
 
     ; deja el desplazamiento en el rdx
 %endmacro
+
 
 extern puts,gets,system,sscanf,printf

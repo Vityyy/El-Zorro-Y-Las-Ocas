@@ -1,7 +1,7 @@
 %include "macros.asm"
 
 global          main
-extern          mostrarMenu,configuracion_tablero
+extern          mostrarMenu,configuracion_tablero,Actividad_Tablero
 
 section         .data
     ; system
@@ -14,27 +14,8 @@ section         .data
     posFil              dq      1
 
     ; relacionado al juego
-    ;zorro
-    zorro               db      "X"
-    zorroPosCol         dq      4
-    zorroPosFil         dq      5
-    
-    ;ocas
-    ocas                db      "O"
-
-    ;Textos de configuracion
-    
-    textConfiguracionTablero    db      "Elija la orientacion en la que quiere ver el tablero: ",0
-    
-
-    ; imprimir por pantalla
-    espacio                         db      " ",0
-    vacio                           db      "",0
-    ficha                           db      " %c ", 0
-    separadorVertical               db      "|",0
-    separadorHorizontal             db      "----------------------------",10,0
-    separadorHorizontalCortado      db      "       -------------        ",10,0
-    saltoLinea                      db      "",10,0
+    zorro               db      "X",0
+    ocas                db      "O",0
 
 section         .bss
     tablero         times 49        resb    1
@@ -42,198 +23,44 @@ section         .bss
     ;configuracion del Juego
 section         .text
 main:
+    mov         rdi, cdm_clear
+    mSystem  
+
     sub         rsp,8
     ;rutina externa que maneja la funcionalidad del menu
     ;devuelve el resultado de la opcion escogida en el rax (numero)
     call        mostrarMenu
     add         rsp,8
 
-    cmp     rax,2
-    je      llamar_configuracion
+    cmp         rax,2
+    je          llamar_configuracion
 
     mov         rdi, cdm_clear
     mSystem
 
+    ;rutina externa Actividad_Tablero la cual se encarga de iniciaizar el tablero
+    ;y mostrar su estado
+    ;parametros: rdi: 1 para inicializar tablero, 2 para mostrar tablero
+    ;            rsi: direccion de la matriz que contiene al tablero
+    ;            rdx:direccion del caracter del zorro
+    ;            rcx: direccion del caracter de la oca
+    mov         rdi,1
+    mov         rsi,tablero
+    lea         rdx,[zorro]
+    lea         rcx,[ocas]
     sub         rsp, 8
-    call        inicializarTablero
+    call        Actividad_Tablero
     add         rsp, 8
 
-    mov         qword[posFil], 0
-    mov         qword[posCol], 1
-
+    mov         rdi,2
+    mov         rsi,tablero
+    lea         rdx,[zorro]
+    lea         rcx,[ocas]
     sub         rsp, 8
-    call        mostrarTablero
+    call        Actividad_Tablero
     add         rsp, 8
-    
+
     ; return del main
-    ret
-;**************************************************************************************************
-inicializarTablero:
-    ;subrutina que deja el tablero en su estdo inicial
-    
-ubicarOcas:
-    ;UBICO LAS OCAS
-
-    sub         rsp, 8
-    call        validarPosicion
-    add         rsp, 8
-
-    ;si rbx = 1 significa que la posicion está fuera del rango del tablero
-    cmp         rbx, 1
-    je          espacioVacio
-
-    cmp         qword[posFil],3
-    jle         ponerOcas
-
-    cmp         qword[posFil], 5
-    jle         ocasEnEsquinas
-
-espacioVacio:
-    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
-
-    _movsb      espacio, tablero, rdx    
-
-    jmp         avanzarInicializacion
-
-ocasEnEsquinas:
-    cmp         qword[posCol],1
-    je          ponerOcas
-
-    cmp         qword[posCol], 7
-    je          ponerOcas
-
-    jmp         espacioVacio
-
-ponerOcas:
-    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
-
-    _movsb      ocas, tablero, rdx
-
-avanzarInicializacion:
-    inc         qword[posCol]
-    cmp         qword[posCol], 7
-    jle         ubicarOcas
-
-    mov         qword[posCol], 1
-
-    inc         qword[posFil]    
-    cmp         qword[posFil], 7
-    jle         ubicarOcas
-
-    mov         qword[posFil], 1
-
-    buscarPosicion      zorroPosFil, zorroPosCol, LONG_ELEMEN, CANT_COL
-
-    _movsb      zorro, tablero, rdx 
-    
-    ;return de inicializacion
-    ret
-
-
-;********************************************************
-;********************************************************  
-
-validarPosicion:
-    ; guarda en el rdx:
-    ; -> 1 en caso de que la posicion no sea válida
-    ; -> 0 en caso de que sea válida
-
-    cmp         qword[posFil], 7
-    jg          invalido
-
-    cmp         qword[posCol], 7
-    jg          invalido
-
-    cmp         qword[posCol], 3
-    jl          filaCortada
-
-    cmp         qword[posCol], 5
-    jg          filaCortada
-
-    jmp         valido
-
-filaCortada:
-    cmp         qword[posFil], 3
-    jl          invalido
-
-    cmp         qword[posFil], 5
-    jg          invalido
-
-    jmp         valido
-invalido:
-    mov         rbx, 1
-    jmp         finValidacion
-
-valido:
-    mov         rbx, 0
-    jmp         finValidacion
-
-finValidacion:
-    ;return de validacion
-    ret
-
-;**********************************************************************
-;**********************************************************************
-
-mostrarTablero:
-    cmp             qword[posFil], 0
-    je              separadorFilasCortado
-
-    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
-    mov             rdi, ficha
-    mov             rsi, [tablero + rdx]
-    mPrintf
-
-    sub             rsp, 8
-    call            validarPosicion
-    add             rsp, 8
-
-    cmp             rbx, 0
-    je              separadorColumnas
-
-
-    cmp             qword[posCol], 2
-    je              separadorColumnas
-
-    mov             rdi, espacio
-    mPrintf
-
-    jmp             avanzarMostrarTablero
-
-separadorColumnas:             
-    mov             rdi, separadorVertical
-    mPrintf
-
-avanzarMostrarTablero:
-    inc         qword[posCol]
-    cmp         qword[posCol], 7
-    jle          mostrarTablero
-
-    mov         rdi, saltoLinea
-    mPrintf
-
-    cmp         qword[posFil], 1
-    jle         separadorFilasCortado
-    
-    cmp         qword[posFil], 6
-    jge         separadorFilasCortado
-
-    mov         rdi, separadorHorizontal
-    mPrintf
-
-    jmp         avanzarFila
-
-separadorFilasCortado:
-    mov         rdi, separadorHorizontalCortado
-    mPrintf
-
-avanzarFila:
-    mov         qword[posCol], 1
-    
-    inc         qword[posFil]
-    cmp         qword[posFil], 7
-    jle         mostrarTablero
-    ; return de mostrarTablero
     ret
 
 ;**********************************************************************
@@ -246,7 +73,7 @@ llamar_configuracion:
     add     rsp,8
 
     cmp     r8,-1
-    je     main
+    je      main
 
     mov     rdi,zorro
     mov     rsi,rax
@@ -259,5 +86,3 @@ llamar_configuracion:
     rep     movsb
 
     jmp     main
-
-    
