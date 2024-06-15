@@ -130,8 +130,6 @@ section         .data
     separadorHorizontalCortado      db      "       -------------        ",10,0
     saltoLinea                      db      "",10,0
 
-    ingreso1                    db  "Se ingreso 1",0
-
 section         .bss
     tablero         times 49        resb    1
 
@@ -139,8 +137,7 @@ section         .bss
     eleccionConfiguracion           resb    50      
     configuracionZorro              resb    50
     configuracionOcas               resb    50
-    configuracionTablero            resb    50      
-    nada resb 1        
+    configuracionTablero            resb    50       
 
 section         .text
 main:
