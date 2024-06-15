@@ -70,7 +70,7 @@ input_Invalido:
 
 fin_del_menu:
     mSystem
-    mov rax,numero_eleccion
+    mov rax,[numero_eleccion]
     ret
     
 

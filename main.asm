@@ -1,98 +1,7 @@
-%macro      buscarPosicion 4
-    ; %1 = fil
-    ; %2 = col
-    ; %3 = longElemento
-    ; %4 = cantCol
-    mov         rax, [%1]
-    dec         rax
-    imul        qword[%4]
-    add         rdx, rax
+%include "macros.asm"
 
-    mov         rcx, rdx
-
-    mov         rax, [%2]
-    dec         rax
-    imul        qword[%3]
-    add         rdx, rax
-    
-    add         rdx, rcx
-
-    ; deja el desplazamiento en el rdx
-%endmacro
-
-%macro      mGets 0
-    sub         rsp, 8
-    call        gets
-    add         rsp, 8
-%endmacro
-
-%macro      mPrintf 0
-    sub         rsp, 8
-    call        printf
-    add         rsp, 8
-%endmacro
-
-%macro      mSystem 0
-    sub     rsp, 8
-    call    system
-    add     rsp, 8
-%endmacro
-
-%macro      mPuts 0 
-    sub     rsp, 8
-    call    puts
-    add     rsp, 8
-%endmacro
-
-%macro      _movsb      3
-    ;   %1 ->    direccion del string origen
-    ;   %2 ->    direccion del string destino
-    ;   %3 ->    desplazamiento, en caso de querer cambiar algo en el tablero
-    ;           0, en cualquier otro caso
-    sub         rsi, rsi
-    sub         rdi, rdi
-
-    mov         rsi, %1
-    mov         rdi, %2
-    add         rdi, %3
-    mov         rcx, 1
-    rep     movsb
-
-%endmacro
-
-%macro      validarFicha    3
-    ;   1 ->    direccion de la ficha ingresada por el usuario
-    ;   2 ->    direccion del espacio en blanco (" ")
-    ;   3 ->    direccion del vacio ("")
-    
-    ;La macro deja en el rbx:
-    ;   - 0 si la ficha es válida
-    ;   - 1 si la ficha es inválida
-
-    mov         rdi, %1
-    mov         rsi, %2
-    mov         rcx, 1
-    repe    cmpsb
-    je          fichaInvalida
-
-    mov         rdi, %1
-    mov         rsi, %3
-    mov         rcx, 1
-    repe    cmpsb
-    je          fichaInvalida
-
-    ; la ficha es válida
-    mov         rbx, 0
-    jmp         finMacro
-
-fichaInvalida:
-    mov         rbx, 1
-finMacro:
-%endmacro
 global          main
-
-extern          printf,system,gets,puts
-extern          mostrarMenu
+extern          mostrarMenu,configuracion_tablero
 
 section         .data
     ; system
@@ -114,12 +23,9 @@ section         .data
     ocas                db      "O"
 
     ;Textos de configuracion
-    textConfiguracion           db      "Deseas configurar la partida (s/n): ",0
-    textConfiguracionZorro      db      "Escriba el caracter con el que quiere representar al zorro: ",0
-    textConfiguracionOcas       db      "Escriba el caracter con el que quiere representar las ocas: ",0
+    
     textConfiguracionTablero    db      "Elija la orientacion en la que quiere ver el tablero: ",0
-    respuestaAfirmativa         db      "s"
-    respuestaNegativa           db      "n"
+    
 
     ; imprimir por pantalla
     espacio                         db      " ",0
@@ -134,11 +40,6 @@ section         .bss
     tablero         times 49        resb    1
 
     ;configuracion del Juego
-    eleccionConfiguracion           resb    50      
-    configuracionZorro              resb    50
-    configuracionOcas               resb    50
-    configuracionTablero            resb    50       
-
 section         .text
 main:
     sub         rsp,8
@@ -147,9 +48,8 @@ main:
     call        mostrarMenu
     add         rsp,8
 
-    sub         rsp, 8
-    call        configuracion
-    add         rsp, 8
+    cmp     rax,2
+    je      llamar_configuracion
 
     mov         rdi, cdm_clear
     mSystem
@@ -164,7 +64,8 @@ main:
     sub         rsp, 8
     call        mostrarTablero
     add         rsp, 8
- 
+    
+    ; return del main
     ret
 ;**************************************************************************************************
 inicializarTablero:
@@ -182,7 +83,7 @@ ubicarOcas:
     je          espacioVacio
 
     cmp         qword[posFil],3
-    jle          ponerOcas
+    jle         ponerOcas
 
     cmp         qword[posFil], 5
     jle         ocasEnEsquinas
@@ -208,8 +109,6 @@ ponerOcas:
 
     _movsb      ocas, tablero, rdx
 
-    jmp         avanzarInicializacion
-
 avanzarInicializacion:
     inc         qword[posCol]
     cmp         qword[posCol], 7
@@ -226,7 +125,8 @@ avanzarInicializacion:
     buscarPosicion      zorroPosFil, zorroPosCol, LONG_ELEMEN, CANT_COL
 
     _movsb      zorro, tablero, rdx 
-
+    
+    ;return de inicializacion
     ret
 
 
@@ -269,6 +169,7 @@ valido:
     jmp         finValidacion
 
 finValidacion:
+    ;return de validacion
     ret
 
 ;**********************************************************************
@@ -332,106 +233,31 @@ avanzarFila:
     inc         qword[posFil]
     cmp         qword[posFil], 7
     jle         mostrarTablero
-
+    ; return de mostrarTablero
     ret
 
 ;**********************************************************************
-;**********************************************************************
 
-configuracion:
-    ; limpio la pantalla
-    mov         rdi, cdm_clear
-    mSystem
+llamar_configuracion:
+    sub     rsp,8
+    ;Rutina externa que deja los nuevo caracteres en el rax y rbx
+    ;Si el R8 es -1, no se realizaron cambios
+    call    configuracion_tablero
+    add     rsp,8
 
-    ; Pregunto al usuario si quiere configurar el juego
-    mov         rdi, textConfiguracion
-    mPuts
-    mov         rdi, eleccionConfiguracion
-    mGets
+    cmp     r8,-1
+    je     main
 
-    mov         rdi, eleccionConfiguracion
-    mov         rsi, respuestaNegativa
-    mov         rcx, 1
-    repe cmpsb
-    je          finConfiguracion
-
-    mov         rdi, eleccionConfiguracion
-    mov         rsi, respuestaAfirmativa
-    mov         rcx, 1
-    repe    cmpsb
-    jne         configuracion
-
-    ; El usuario quiere cambiar la configuracion
-    ; CONFIGURACION DEL ZORRO
-configurarZorro:
-    ; limpio la pantalla
-    mov         rdi, cdm_clear
-    mSystem
-
-    mov         rdi, textConfiguracionZorro
-    mPuts
-    mov         rdi, configuracionZorro
-    mGets
-
-    ;verifico que lo que puso el usuario no sea un espacio (" ")
-    mov         rdi, configuracionZorro
-    mov         rsi, espacio
-    mov         rcx, 1
-    repe    cmpsb
-    je          configurarZorro
-
-    ;verifico que lo que puso el usuario no sea un vacío ("")
-    mov         rdi, configuracionZorro
-    mov         rsi, vacio
-    mov         rcx, 1
-    repe    cmpsb
-    je          configurarZorro
-
-
-    ; cambio la ficha del zorro a la nueva
-    mov         rsi, configuracionZorro
-    mov         rdi, zorro
-    mov         rcx, 1
+    mov     rdi,zorro
+    mov     rsi,rax
+    mov     rcx,1
     rep     movsb
+
+    mov     rdi,ocas
+    mov     rsi,rbx
+    mov     rcx,1
+    rep     movsb
+
+    jmp     main
+
     
-
-    ;CONFIGURACION DE LAS OCAS
-configurarOcas:
-    mov         rdi, cdm_clear
-    mSystem
-
-    mov         rdi, textConfiguracionOcas
-    mPuts
-    mov         rdi, configuracionOcas
-    mGets
-
-    ;verifico que lo que puso el usuario no sea un espacio (" ")
-    mov         rdi, configuracionOcas
-    mov         rsi, espacio
-    mov         rcx, 1
-    repe    cmpsb
-    je          configurarOcas
-
-    ;verifico que lo que puso el usuario no sea un vacío ("")
-    mov         rdi, configuracionOcas
-    mov         rsi, vacio
-    mov         rcx, 1
-    repe    cmpsb
-    je          configurarOcas
-
-    ;verifico que lo ingresado por el usuario no es igual al Zorro
-    mov         rdi, configuracionOcas
-    mov         rsi, zorro
-    mov         rcx, 1
-    repe    cmpsb
-    je          configurarOcas
-
-    mov         rsi, configuracionOcas
-    mov         rdi, ocas
-    mov         rcx, 1
-    rep     movsb
-
-configurarTablero:
-
-finConfiguracion:
-    ret
