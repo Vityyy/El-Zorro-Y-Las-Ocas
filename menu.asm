@@ -1,30 +1,6 @@
-%macro mPuts 0
-    sub rsp,8
-    call puts
-    add rsp,8
-%endmacro
-
-%macro mGets 0
-    sub rsp,8
-    call gets
-    add rsp,8
-%endmacro
-
-%macro mSscanf 0
-    sub rsp,8
-    call sscanf
-    add rsp,8
-%endmacro
-
-%macro mSystem 0
-    mov rdi,cdm_clear
-    sub rsp,8
-    call system
-    add rsp,8
-%endmacro
+%include "macros.asm"
 
 global mostrarMenu
-extern puts,gets,sscanf,system
 
 section .data
     mensaje_menu           db "Bienvenido al juego del Zorro y las Ocas",10,"Presione el numero correspondiente a la accion requerida",10,"1-Jugar",10,"2-Opciones",0
