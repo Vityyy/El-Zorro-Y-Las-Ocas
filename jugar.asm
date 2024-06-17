@@ -98,7 +98,7 @@ actualizar_posicion_zorro:
     mov rsi,[direc_fila_zorro]
     mov [rsi],rdi
     mov rdi,[columna]
-    mov rsi,[direc_fila_zorro]
+    mov rsi,[direc_columna_zorro]
     mov [rsi],rdi
     jmp end
 

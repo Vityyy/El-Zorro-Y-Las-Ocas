@@ -27,6 +27,13 @@ section .bss
     direc_caracter_ocas  resq 1
 
 section .text
+;rutina externa Actividad_Tablero la cual se encarga de iniciaizar el tablero
+    ;y mostrar su estado
+    ;parametros: rdi: 1 para inicializar tablero, 2 para mostrar tablero
+    ;            rsi: direccion de la matriz que contiene al tablero
+    ;            rdx:direccion del caracter del zorro
+    ;            rcx: direccion del caracter de la oca
+    
 Actividad_Tablero:
     mov [direc_tablero],rsi
     mov [direc_caracter_zorro],rdx
