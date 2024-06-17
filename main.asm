@@ -1,7 +1,7 @@
 %include "macros.asm"
 
 global          main
-extern          mostrarMenu,configuracion_tablero,Actividad_Tablero
+extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro
 
 section         .data
     ; system
@@ -10,12 +10,14 @@ section         .data
     ; relacionado al tablero
     CANT_COL            dq      7
     LONG_ELEMEN         dq      1
-    posCol              dq      1
-    posFil              dq      1
+    posCol_zorro        dq      4
+    posFil_zorro        dq      5
 
     ; relacionado al juego
     zorro               db      "X",0
     ocas                db      "O",0
+
+    mensaje_Final       db      "Saliendo del programa, Gracias por jugar",0
 
 section         .bss
     tablero         times 49        resb    1
@@ -23,8 +25,7 @@ section         .bss
     ;configuracion del Juego
 section         .text
 main:
-    mov         rdi, cdm_clear
-    mSystem  
+    mSystem  cdm_clear
 
     sub         rsp,8
     ;rutina externa que maneja la funcionalidad del menu
@@ -35,15 +36,6 @@ main:
     cmp         rax,2
     je          llamar_configuracion
 
-    mov         rdi, cdm_clear
-    mSystem
-
-    ;rutina externa Actividad_Tablero la cual se encarga de iniciaizar el tablero
-    ;y mostrar su estado
-    ;parametros: rdi: 1 para inicializar tablero, 2 para mostrar tablero
-    ;            rsi: direccion de la matriz que contiene al tablero
-    ;            rdx:direccion del caracter del zorro
-    ;            rcx: direccion del caracter de la oca
     mov         rdi,1
     mov         rsi,tablero
     lea         rdx,[zorro]
@@ -52,6 +44,13 @@ main:
     call        Actividad_Tablero
     add         rsp, 8
 
+gameplay:
+    ;rutina externa Actividad_Tablero la cual se encarga de iniciaizar el tablero
+    ;y mostrar su estado
+    ;parametros: rdi: 1 para inicializar tablero, 2 para mostrar tablero
+    ;            rsi: direccion de la matriz que contiene al tablero
+    ;            rdx:direccion del caracter del zorro
+    ;            rcx: direccion del caracter de la oca
     mov         rdi,2
     mov         rsi,tablero
     lea         rdx,[zorro]
@@ -60,19 +59,28 @@ main:
     call        Actividad_Tablero
     add         rsp, 8
 
-    ; return del main
-    ret
+    mov         rdi,tablero
+    mov         rsi,zorro
+    mov         rdx,posFil_zorro
+    mov         rcx,posCol_zorro
+    sub         rsp,8
+    call        jugar_zorro
+    add         rsp,8
 
+    cmp rax,-1
+    je end_game
+
+    jmp gameplay
 ;**********************************************************************
 
 llamar_configuracion:
     sub     rsp,8
     ;Rutina externa que deja los nuevo caracteres en el rax y rbx
-    ;Si el R8 es -1, no se realizaron cambios
+    ;Si el R10 es -1, no se realizaron cambios
     call    configuracion_tablero
     add     rsp,8
 
-    cmp     r8,-1
+    cmp     r10,-1
     je      main
 
     mov     rdi,zorro
@@ -86,3 +94,9 @@ llamar_configuracion:
     rep     movsb
 
     jmp     main
+
+end_game:
+    mSystem cdm_clear
+    mPuts mensaje_Final
+    ;fin de programa
+    ret

@@ -1,10 +1,12 @@
-%macro mPuts 0
+%macro mPuts 1
+    mov rdi,%1
     sub rsp,8
     call puts
     add rsp,8
 %endmacro
 
-%macro mGets 0
+%macro mGets 1
+    mov rdi,%1
     sub rsp,8
     call gets
     add rsp,8
@@ -16,13 +18,18 @@
     add  rsp, 8
 %endmacro
 
-%macro mSscanf 0
+%macro mSscanf 3
+    mov rdi,%1
+    mov rsi,%2
+    mov rdx,%3
+
     sub rsp,8
     call sscanf
     add rsp,8
 %endmacro
 
-%macro mSystem 0
+%macro mSystem 1
+    mov rdi,%1
     sub rsp,8
     call system
     add rsp,8
@@ -33,14 +40,27 @@
     ;   %2 ->    direccion del string destino
     ;   %3 ->    desplazamiento, en caso de querer cambiar algo en el tablero
     ;           0, en cualquier otro caso
-    sub         rsi, rsi
-    sub         rdi, rdi
+    xor         rsi, rsi
+    xor         rdi, rdi
     
     mov         rsi, %1
     mov         rdi, %2
     add         rdi, %3
     mov         rcx, 1
     rep     movsb
+
+%endmacro
+%macro mCMPSB 3
+    ;   %1 ->    direccion del string origen
+    ;   %2 ->    direccion del string destino
+    ;   %3 ->    bytes a comparar
+    xor         rsi,rsi
+    xor         rdi,rdi
+
+    mov         rsi,%1
+    mov         rdi,%2
+    mov         rcx,%3
+    repe        cmpsb
 
 %endmacro
 

@@ -15,16 +15,12 @@ section .bss
     
 section .text
 mostrarMenu:
-    mSystem
-    mov rdi,mensaje_menu
-    mPuts
-    mov rdi,eleccion_usuario
-    mGets
+    mSystem cdm_clear
 
-    mov rdi,eleccion_usuario
-    mov rsi,formato
-    mov rdx,numero_eleccion
-    mSscanf
+    mPuts mensaje_menu
+    mGets eleccion_usuario
+
+    mSscanf eleccion_usuario,formato,numero_eleccion
 
     cmp rax,1
     jl  input_Invalido
@@ -37,15 +33,15 @@ mostrarMenu:
     
 
 input_Invalido:
-    mSystem
-    mov rdi,mensaje_Input_Invalido
-    mPuts
-    mov rdi,solo_enter
-    mGets
+    mSystem cdm_clear
+
+    mPuts mensaje_Input_Invalido
+    mGets solo_enter
+    
     jmp mostrarMenu
 
 fin_del_menu:
-    mSystem
+    mSystem cdm_clear
     mov rax,[numero_eleccion]
     ret
     

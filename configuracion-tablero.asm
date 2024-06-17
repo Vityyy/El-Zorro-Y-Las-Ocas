@@ -7,8 +7,8 @@ section .data
     textConfiguracion           db      "Deseas configurar la partida (s/n): ",0
     textConfiguracionZorro      db      "Escriba el caracter con el que quiere representar al zorro: ",0
     textConfiguracionOcas       db      "Escriba el caracter con el que quiere representar las ocas: ",0
-    respuestaAfirmativa         db      "s"
-    respuestaNegativa           db      "n"
+    respuestaAfirmativa         db      "s",0
+    respuestaNegativa           db      "n",0
     espacio                     db      " ",0
     vacio                       db      "",0
 
@@ -21,38 +21,26 @@ section .bss
 section .text
 configuracion_tablero:
     ; limpio la pantalla
-    mov         rdi, cdm_clear
-    mSystem
+    mSystem cdm_clear
 
     ; Pregunto al usuario si quiere configurar el juego
-    mov         rdi, textConfiguracion
-    mPuts
-    mov         rdi, eleccionConfiguracion
-    mGets
+    mPuts   textConfiguracion
+    mGets   eleccionConfiguracion
 
-    mov         rdi, eleccionConfiguracion
-    mov         rsi, respuestaNegativa
-    mov         rcx, 1
-    repe        cmpsb
+    mCMPSB respuestaNegativa,eleccionConfiguracion,2
     je          Sin_cambios
 
-    mov         rdi, eleccionConfiguracion
-    mov         rsi, respuestaAfirmativa
-    mov         rcx, 1
-    repe        cmpsb
+    mCMPSB eleccionConfiguracion,respuestaAfirmativa,2
     jne         configuracion_tablero
 
     ; El usuario quiere cambiar la configuracion
     ; CONFIGURACION DEL ZORRO
 configurarZorro:
     ; limpio la pantalla
-    mov         rdi, cdm_clear
-    mSystem
+    mSystem cdm_clear
 
-    mov         rdi, textConfiguracionZorro
-    mPuts
-    mov         rdi, configuracion
-    mGets
+    mPuts   textConfiguracionZorro
+    mGets   configuracion
 
     sub     rsp,8
     call validar_input
@@ -68,13 +56,10 @@ configurarZorro:
 
 ;CONFIGURACION DE LAS OCAS
 configurarOcas:
-    mov         rdi, cdm_clear
-    mSystem
+    mSystem cdm_clear
 
-    mov         rdi, textConfiguracionOcas
-    mPuts
-    mov         rdi, configuracion
-    mGets
+    mPuts   textConfiguracionOcas
+    mGets   configuracion
 
     sub     rsp,8
     call validar_input
@@ -84,10 +69,7 @@ configurarOcas:
     je      configurarOcas
 
     ;caso particular para que los simbolos de ambos no sean iguales
-    mov         rdi, configuracion
-    mov         rsi, zorro
-    mov         rcx, 1
-    repe        cmpsb
+    mCMPSB configuracion,zorro,1
     je          configurarOcas
 
     mov         rsi, configuracion
@@ -98,22 +80,17 @@ configurarOcas:
 
 validar_input:
     mov     rax,-1
+
     mov     bl,byte[configuracion+1]
     cmp     bl,0
     jne     fin_validacion
 
     ;verifico que lo que puso el usuario no sea un espacio (" ")
-    mov         rdi, configuracion
-    mov         rsi, espacio
-    mov         rcx, 1
-    repe        cmpsb
+    mCMPSB espacio,configuracion,1
     je          fin_validacion
 
     ;verifico que lo que puso el usuario no sea un vacío ("")
-    mov         rdi, configuracion
-    mov         rsi, vacio
-    mov         rcx, 1
-    repe        cmpsb
+    mCMPSB vacio,configuracion,1
     je          fin_validacion
 
 input_valido:
@@ -123,7 +100,7 @@ fin_validacion:
     ret
 
 Sin_cambios:
-    mov     r8,-1
+    mov     r10,-1
 
 finConfiguracion:
     lea     rax,[zorro]
