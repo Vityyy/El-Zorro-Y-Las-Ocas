@@ -74,7 +74,7 @@ validar_rango:
     cmp         qword[columna], 5
     jg          filaCortada
 
-    jmp         mover_zorro
+    jmp         validar_movimiento
 
 filaCortada:
     cmp         qword[fila], 3
@@ -82,6 +82,26 @@ filaCortada:
 
     cmp         qword[fila], 5
     jg          turno_zorro
+
+validar_movimiento:
+    mov r10,[direc_fila_zorro]
+    mov r12,[r10]
+    sub r12,[fila]
+    cmp r12,1
+    jg turno_zorro
+    cmp r12,-1
+    jl turno_zorro
+
+    mov r10,[direc_columna_zorro]
+    mov r13,[r10]
+    sub r13,[columna]
+    cmp r13,1
+    jg turno_zorro
+    cmp r13,-1
+    jl turno_zorro
+
+    cmp r12,r13     ;caso particular en que la coordenada sea la misma en la que estaba
+    je turno_zorro
 
 mover_zorro:
     buscarPosicion fila,columna,LONG_ELEMEN,CANT_COL
