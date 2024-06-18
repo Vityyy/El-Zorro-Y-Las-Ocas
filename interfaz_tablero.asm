@@ -69,7 +69,7 @@ ubicarOcas:
 espacioVacio:
     buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
 
-    _movsb      espacio, [direc_tablero], rdx    
+    _movsb      espacio, [direc_tablero], rdx, 1   
 
     jmp         avanzarInicializacion
 
@@ -85,7 +85,7 @@ ocasEnEsquinas:
 ponerOcas:
     buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
 
-    _movsb      [direc_caracter_ocas], [direc_tablero], rdx
+    _movsb      [direc_caracter_ocas], [direc_tablero], rdx, 1
 
 avanzarInicializacion:
     inc         qword[posCol]
@@ -102,7 +102,7 @@ avanzarInicializacion:
 
     buscarPosicion     zorroPosFilInicial, zorroPosColInicial, LONG_ELEMEN, CANT_COL
 
-    _movsb      [direc_caracter_zorro], [direc_tablero], rdx 
+    _movsb      [direc_caracter_zorro], [direc_tablero], rdx, 1
     
     ;return de inicializacion
     jmp         fin

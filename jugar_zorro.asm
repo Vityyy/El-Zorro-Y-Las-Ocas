@@ -100,18 +100,19 @@ validar_movimiento:
     cmp r13,-1
     jl turno_zorro
 
-    cmp r12,r13     ;caso particular en que la coordenada sea la misma en la que estaba
+    add r12,r13     ;caso particular en que la coordenada sea la misma en la que estaba
+    cmp r12,0
     je turno_zorro
 
 mover_zorro:
     buscarPosicion fila,columna,LONG_ELEMEN,CANT_COL
-    _movsb [direc_caracter_zorro],[direc_tablero],rdx
+    _movsb [direc_caracter_zorro], [direc_tablero], rdx, 1
 
 borrar_posicion_anterior:
     mov r10,[direc_fila_zorro]
     mov r11,[direc_columna_zorro]
     buscarPosicion r10,r11,LONG_ELEMEN,CANT_COL
-    _movsb espacio,[direc_tablero],rdx
+    _movsb espacio,[direc_tablero],rdx,1
 
 actualizar_posicion_zorro:
     mov rdi,[fila]
@@ -129,8 +130,3 @@ validar_exit:
 
 end:
     ret
-
-
-
-
-

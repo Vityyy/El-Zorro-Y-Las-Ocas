@@ -35,7 +35,7 @@
     add rsp,8
 %endmacro
 
-%macro      _movsb      3
+%macro      _movsb      4
     ;   %1 ->    direccion del string origen
     ;   %2 ->    direccion del string destino
     ;   %3 ->    desplazamiento, en caso de querer cambiar algo en el tablero
@@ -46,7 +46,7 @@
     mov         rsi, %1
     mov         rdi, %2
     add         rdi, %3
-    mov         rcx, 1
+    mov         rcx, %4
     rep     movsb
 
 %endmacro

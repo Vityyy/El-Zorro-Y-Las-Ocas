@@ -71,7 +71,7 @@ gameplay:
 
 llamar_configuracion:
     sub     rsp,8
-    ;Rutina externa que deja los nuevo caracteres en el rax y rbx
+    ;Rutina externa que deja la direccion de los nuevos caracteres en el rax y rbx
     ;Si el R10 es -1, no se realizaron cambios
     call    configuracion_tablero
     add     rsp,8
@@ -81,12 +81,12 @@ llamar_configuracion:
 
     mov     rdi,zorro
     mov     rsi,rax
-    mov     rcx,1
+    mov     rcx,2
     rep     movsb
 
     mov     rdi,ocas
     mov     rsi,rbx
-    mov     rcx,1
+    mov     rcx,2
     rep     movsb
 
     jmp     main

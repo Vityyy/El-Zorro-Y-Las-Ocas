@@ -49,10 +49,8 @@ configurarZorro:
     cmp     rax,-1
     je      configurarZorro
 
-    mov         rsi, configuracion
-    mov         rdi, zorro
-    mov         rcx, 1
-    rep         movsb
+
+    _movsb  configuracion,zorro,0,1
 
 ;CONFIGURACION DE LAS OCAS
 configurarOcas:
@@ -69,13 +67,10 @@ configurarOcas:
     je      configurarOcas
 
     ;caso particular para que los simbolos de ambos no sean iguales
-    mCMPSB configuracion,zorro,1
+    mCMPSB configuracion, zorro, 1
     je          configurarOcas
 
-    mov         rsi, configuracion
-    mov         rdi, ocas
-    mov         rcx, 1
-    rep         movsb
+    _movsb configuracion, ocas, 0, 1
     jmp         finConfiguracion
 
 validar_input:
@@ -86,11 +81,11 @@ validar_input:
     jne     fin_validacion
 
     ;verifico que lo que puso el usuario no sea un espacio (" ")
-    mCMPSB espacio,configuracion,1
+    mCMPSB espacio, configuracion, 1
     je          fin_validacion
 
     ;verifico que lo que puso el usuario no sea un vacío ("")
-    mCMPSB vacio,configuracion,1
+    mCMPSB vacio, configuracion, 1
     je          fin_validacion
 
 input_valido:
