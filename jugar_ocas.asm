@@ -5,10 +5,14 @@ extern validador_formato
 section .data
     CANT_COL              dq  7
     LONG_ELEMEN           dq  1
+    espacio               db " ",0
+    mensaje_invalido      db "Movimiento ingresado invalido, intente nuevamente",0
 
 section .bss
-    fila_aux                resq 1
-    columna_aux             resq 1
+    fila_origen             resq 1
+    columna_origen          resq 1
+    fila_destino            resq 1
+    columna_destino         resq 1
     direc_caracter_ocas     resq 1
     direc_tablero           resq 1
     
@@ -27,51 +31,56 @@ seleccion:
 
     cmp rax,-1
     je  fin_turno
-    mov [fila],rdi
-    mov [columna],rsi
+
+    mov [fila_destino],rdi
+    mov [columna_destino],rsi
+    mov [fila_origen],rdx
+    mov [columna_origen],rcx
     
-validar_posicion:
-    buscarPosicion fila,columna,LONG_ELEMEN,CANT_COL
-    mov rdi,[direc_tablero]
-    mov rsi, [rdi + rdx]
-    mCMPSB rsi,[direc_caracter_ocas],1
-    jne seleccion
+validar_existencia_oca:
+    buscarPosicion fila_origen,columna_origen,LONG_ELEMEN,CANT_COL
+    mov r10,[direc_tablero]
+    add r10,rdx
+    mCMPSB r10,[direc_caracter_ocas],1
+    jne input_invalido
 
-    mov r10,[fila]
-    mov [fila_aux],r10
+validar_movimiento_permitido:
+    mov r8,[fila_destino]
+    sub r8,[fila_origen]
+    cmp r8,1
+    je  validar_mov_vertical
+    cmp r8,0
+    je  validar_mov_horizontal
 
-    mov r12,[columna]
-    mov [columna_aux],r13
-    dec qword [columna_aux]
+validar_mov_vertical:
+    mov r9,[columna_destino]
+    sub r9,[columna_origen]
+    cmp r9,0
+    je  mover_oca
+
+    jmp input_invalido
     
-ver_columnas:
+validar_mov_horizontal:
+    mov r9,[columna_destino]
+    sub r9,[columna_origen]
+    cmp r9,1
+    je  mover_oca
+    cmp r9,-1
+    je  mover_oca
 
-    ver que no este fuera
+    jmp input_invalido
 
-    buscarPosicion fila_aux,columna_aux,LONG_ELEMEN,CANT_COL
-    mov rdi,[direc_tablero]
-    mov rsi,[rdi + rdx]
-    mCMPSB rsi,espacio,1
-    je posicion_validada
+input_invalido:
+    mPuts mensaje_invalido
+    jmp seleccion
 
-mover_columna:
-    add qword [columna_aux], 2
-    mov rdi,[columna_aux]
-    sub rdi,r10
-    cmp rdi,1
-    jg  ver_columnas
+mover_oca:
+    buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
+    _movsb [direc_caracter_ocas], [direc_tablero], rdx, 1
 
-
-
-
-
+borrar_posicion_anterior:
+    buscarPosicion fila_origen,columna_origen,LONG_ELEMEN,CANT_COL
+    _movsb espacio,[direc_tablero],rdx,1
     
-
-validar_movimiento:
-    
-
-
-
-
 fin_turno:
     ret

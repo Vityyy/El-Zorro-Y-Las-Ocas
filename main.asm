@@ -1,7 +1,7 @@
 %include "macros.asm"
 
 global          main
-extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato
+extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas
 
 section         .data
     ; system
@@ -17,7 +17,7 @@ section         .data
     zorro               db      "X",0
     ocas                db      "O",0
 
-    mensaje_Final       db      "Saliendo del programa, Gracias por jugar",0
+    mensaje_Final       db      "Saliendo del programa. Gracias por jugar",0
 
 section         .bss
     tablero         times 49        resb    1
@@ -61,6 +61,25 @@ gameplay:
     mov         rcx,posCol_zorro
     sub         rsp,8
     call        jugar_zorro
+    add         rsp,8
+
+    cmp rax,-1
+    je end_game
+
+    mSystem cdm_clear
+    
+    mov         rdi,2
+    mov         rsi,tablero
+    lea         rdx,[zorro]
+    lea         rcx,[ocas]
+    sub         rsp, 8
+    call        Actividad_Tablero
+    add         rsp, 8
+
+    mov         rdi,tablero
+    mov         rsi,ocas
+    sub         rsp,8
+    call        jugar_ocas
     add         rsp,8
 
     cmp rax,-1

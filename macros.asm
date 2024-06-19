@@ -38,8 +38,9 @@
 %macro      _movsb      4
     ;   %1 ->    direccion del string origen
     ;   %2 ->    direccion del string destino
-    ;   %3 ->    desplazamiento, en caso de querer cambiar algo en el tablero
-    ;           0, en cualquier otro caso
+    ;   %3 ->    desplazamiento, en caso de querer cambiar algo en el tablero 0, en cualquier otro caso
+    ;   %4 ->    bytes a copiar
+    
     xor         rsi, rsi
     xor         rdi, rdi
     
@@ -54,12 +55,12 @@
     ;   %1 ->    direccion del string origen
     ;   %2 ->    direccion del string destino
     ;   %3 ->    bytes a comparar
-    xor         rsi,rsi
-    xor         rdi,rdi
+    xor         rsi, rsi
+    xor         rdi, rdi
 
-    mov         rsi,%1
-    mov         rdi,%2
-    mov         rcx,%3
+    mov         rsi, %1
+    mov         rdi, %2
+    mov         rcx, %3
     repe        cmpsb
 
 %endmacro
