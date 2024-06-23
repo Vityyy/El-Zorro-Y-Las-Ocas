@@ -44,6 +44,13 @@ validar_existencia_oca:
     mCMPSB r10,[direc_caracter_ocas],1
     jne input_invalido
 
+    ; reviso si el destino es un espacio vacío
+    buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
+    mov r10,[direc_tablero]
+    add r10,rdx
+    mCMPSB r10,espacio,1
+    jne input_invalido
+
 validar_movimiento_permitido:
     mov r8,[fila_destino]
     sub r8,[fila_origen]
@@ -51,6 +58,8 @@ validar_movimiento_permitido:
     je  validar_mov_vertical
     cmp r8,0
     je  validar_mov_horizontal
+
+    jmp input_invalido
 
 validar_mov_vertical:
     mov r9,[columna_destino]
