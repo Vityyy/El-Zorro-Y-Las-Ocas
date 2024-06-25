@@ -49,6 +49,7 @@ Actividad_Tablero:
 
     mov         qword[posFil], 0
     mov         qword[posCol], 0
+    mov         qword[contadorAux],0
     jmp iniciar_mostrarTablero
 
 inicializarTablero:
