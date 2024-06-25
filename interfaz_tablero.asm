@@ -1,5 +1,7 @@
 %include "macros.asm"
+
 global Actividad_Tablero
+
 section .data
     ; relacionado al tablero
     CANT_COL            dq      7
@@ -17,11 +19,14 @@ section .data
     ;posicion inicial del Zorro
     zorroPosColInicial        dq      4
     zorroPosFilInicial        dq      5
+
 section .bss
     direc_tablero        resq 1
     direc_caracter_zorro resq 1
     direc_caracter_ocas  resq 1
+    
 section .text
+
 ;rutina externa Actividad_Tablero la cual se encarga de iniciaizar el tablero
     ;y mostrar su estado
     ;parametros: rdi: 1 para inicializar tablero, 2 para mostrar tablero
@@ -33,11 +38,14 @@ Actividad_Tablero:
     mov [direc_tablero],rsi
     mov [direc_caracter_zorro],rdx
     mov [direc_caracter_ocas],rcx
+
     cmp rdi,1
     je inicializarTablero
+    
     mov         qword[posFil], 0
     mov         qword[posCol], 1
     jmp mostrarTablero
+    
 inicializarTablero:
     ;subrutina que deja el tablero en su estdo inicial
     
@@ -54,6 +62,7 @@ ubicarOcas:
     jle         ponerOcas
     cmp         qword[posFil], 5
     jle         ocasEnEsquinas
+    
 espacioVacio:
     buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
 
@@ -68,6 +77,7 @@ ocasEnEsquinas:
     cmp         qword[posCol], 7
     je          ponerOcas
     jmp         espacioVacio
+    
 ponerOcas:
     buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
 
@@ -92,6 +102,7 @@ avanzarInicializacion:
     ;return de inicializacion
     jmp         fin
 ;**********************************************************************
+
 mostrarTablero:
    
     cmp             qword[posFil], 0
@@ -112,9 +123,11 @@ mostrarTablero:
     mov             rdi, espacio
     mPrintf
     jmp             avanzarMostrarTablero
+
 separadorColumnas:             
     mov             rdi, separadorVertical
     mPrintf
+
 avanzarMostrarTablero:
     inc         qword[posCol]
     cmp         qword[posCol], 7
@@ -129,9 +142,11 @@ avanzarMostrarTablero:
     mov         rdi, separadorHorizontal
     mPrintf
     jmp         avanzarFila
+
 separadorFilasCortado:
     mov         rdi, separadorHorizontalCortado
     mPrintf
+
 avanzarFila:
     mov         qword[posCol], 1
     inc         qword[posFil]
@@ -140,6 +155,7 @@ avanzarFila:
     ; return de mostrarTablero
     jmp         fin
 ;***************************************************************************
+
 validarPosicion:
     ; guarda en el rdx:
     ; -> 1 en caso de que la posicion no sea válida
@@ -153,20 +169,25 @@ validarPosicion:
     cmp         qword[posCol], 5
     jg          filaCortada
     jmp         valido
+
 filaCortada:
     cmp         qword[posFil], 3
     jl          invalido
     cmp         qword[posFil], 5
     jg          invalido
     jmp         valido
+
 invalido:
     mov         rbx, 1
     jmp         finValidacion
+
 valido:
     mov         rbx, 0
     jmp         finValidacion
+
 finValidacion:
     ;return de validacion
     ret
+
 fin:
     ret

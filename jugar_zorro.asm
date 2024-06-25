@@ -10,11 +10,11 @@ section  .data
 
 section  .bss
     direc_caracter_zorro    resq 1
-    direc_fila_zorro        resq 1
-    direc_columna_zorro     resq 1
+    direc_fila_zorro        resq 1                 ; Fila actual
+    direc_columna_zorro     resq 1                 ; Columna actual
     direc_tablero           resq 1
-    fila                    resq 1
-    columna                 resq 1
+    fila_destino            resq 1                 ; Fila destino
+    columna_destino         resq 1                 ; Columna destino
     coordenada_seleccionada resb 5
 
 section  .text
@@ -35,13 +35,20 @@ inicio:
     cmp rax,-1
     je  fin_turno
 
-    mov [fila],rdi
-    mov [columna],rsi
+    mov [fila_destino],rdi
+    mov [columna_destino],rsi
+
+validar_colision:
+    buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
+    mov r10,[direc_tablero]
+    add r10,rdx
+    mCMPSB r10,espacio,1
+    jne inicio
 
 validar_movimiento:
     mov r10,[direc_fila_zorro]
     mov r12,[r10]
-    sub r12,[fila]
+    sub r12,[fila_destino]
     cmp r12,1
     jg inicio
     cmp r12,-1
@@ -49,7 +56,7 @@ validar_movimiento:
 
     mov r10,[direc_columna_zorro]
     mov r13,[r10]
-    sub r13,[columna]
+    sub r13,[columna_destino]
     cmp r13,1
     jg inicio
     cmp r13,-1
@@ -59,7 +66,7 @@ validar_movimiento:
     jz inicio
 
 mover_zorro:
-    buscarPosicion fila,columna,LONG_ELEMEN,CANT_COL
+    buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
     _movsb [direc_caracter_zorro], [direc_tablero], rdx, 1
 
 borrar_posicion_anterior:
@@ -69,10 +76,10 @@ borrar_posicion_anterior:
     _movsb espacio,[direc_tablero],rdx,1
 
 actualizar_posicion_zorro:
-    mov rdi,[fila]
+    mov rdi,[fila_destino]
     mov rsi,[direc_fila_zorro]
     mov [rsi],rdi
-    mov rdi,[columna]
+    mov rdi,[columna_destino]
     mov rsi,[direc_columna_zorro]
     mov [rsi],rdi
     jmp fin_turno
