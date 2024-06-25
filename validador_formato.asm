@@ -27,7 +27,7 @@ section .text
 
 validador_formato:
     cmp rdi,0
-    je  mensaje_moverse
+    je  mensaje_moverse_zorro
 
 mensaje_seleccion_ocas:
     mPuts mensaje_ocas
@@ -79,7 +79,7 @@ asignacion:
     mov rcx,[columna_origen]
     jmp fin_validacion
     
-mensaje_moverse:
+mensaje_moverse_zorro:
     mPuts mensaje_movimiento
     mGets coordenada_seleccionada_destino
 
@@ -98,6 +98,9 @@ mensaje_moverse:
     sub rsp,8
     call validador 
     add rsp,8
+
+    cmp rax,0
+    je mensaje_moverse_zorro
     
 fin_validacion:
     mov rdi,[fila_destino]

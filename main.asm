@@ -1,7 +1,7 @@
 %include "macros.asm"
 
 global          main
-extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas
+extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin
 
 section         .data
     ; system
@@ -16,11 +16,16 @@ section         .data
     ; relacionado al juego
     zorro               db      "X",0
     ocas                db      "O",0
-
-    mensaje_Final       db      "Saliendo del programa. Gracias por jugar",0
+    formato             db      "%li",0
+    kills               dq       0
+    mensaje_gana_zorro  db      "¡El zorro gana! ¿Quieres volver a jugar? [-1 = salir]",0
+    mensaje_ganan_ocas  db      "Las ocas ganan! ¿Quieres volver a jugar? [-1 = salir]",0
+    mensaje_Final       db      "Saliendo del programa. Gracias por jugar.",0
 
 section         .bss
     tablero         times 49        resb    1
+    volver_a_jugar                  resb    1
+    eleccion                        resq    1
 
     ;configuracion del Juego
 section         .text
@@ -66,6 +71,10 @@ gameplay:
     cmp rax,-1
     je end_game
 
+
+    cmp rbx,1
+    je aumentar_score
+    
     mSystem cdm_clear
     
     mov         rdi,2
@@ -85,8 +94,38 @@ gameplay:
     cmp rax,-1
     je end_game
 
+    jmp corroborar_acorralamiento
+
+aumentar_score:
+    inc qword[kills]
+    cmp qword[kills],12
+    je  gana_zorro
     jmp gameplay
-;**********************************************************************
+
+corroborar_acorralamiento:
+    mov rdi,tablero
+    mov rsi,[posFil_zorro]
+    mov rdx,[posCol_zorro]
+    mov rcx,1
+    sub rsp,8
+    call condicion_de_fin
+    add rsp,8
+
+    cmp rax,1
+    je  gameplay
+
+    mov rdi,tablero
+    mov rsi,[posFil_zorro]
+    mov rdx,[posCol_zorro]
+    mov rcx,2
+    sub rsp,8
+    call condicion_de_fin
+    add rsp,8
+    
+    cmp rax,1
+    je  gameplay
+
+    jmp ganan_ocas
 
 llamar_configuracion:
     sub     rsp,8
@@ -109,6 +148,21 @@ llamar_configuracion:
     rep     movsb
 
     jmp     main
+
+gana_zorro:
+    mPuts mensaje_gana_zorro
+    jmp jugar_de_nuevo?
+
+ganan_ocas:
+    mPuts mensaje_ganan_ocas
+
+jugar_de_nuevo?:
+    mGets volver_a_jugar
+    mSscanf volver_a_jugar,formato,eleccion
+    cmp rax,1
+    jl  main
+    cmp qword[eleccion],-1
+    jne main
 
 end_game:
     mSystem cdm_clear

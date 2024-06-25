@@ -15,7 +15,10 @@ section  .bss
     direc_tablero           resq 1
     fila_destino            resq 1                 ; Fila destino
     columna_destino         resq 1                 ; Columna destino
+    fila_salto              resq 1
+    columna_salto           resq 1
     coordenada_seleccionada resb 5
+    comio_oca?              resq 1
 
 section  .text
 
@@ -25,6 +28,7 @@ jugar_zorro:
     mov [direc_caracter_zorro],rsi
     mov [direc_fila_zorro],rdx
     mov [direc_columna_zorro],rcx
+    mov byte[comio_oca?],0
 
 inicio:
     mov rdi,0
@@ -47,24 +51,59 @@ validar_colision:
 
 validar_movimiento:
     mov r10,[direc_fila_zorro]
-    mov r12,[r10]
-    sub r12,[fila_destino]
-    cmp r12,1
-    jg inicio
-    cmp r12,-1
-    jl inicio
+    mov r12,[fila_destino]
+    sub r12,[r10]
+    imul r12,r12
 
     mov r10,[direc_columna_zorro]
-    mov r13,[r10]
-    sub r13,[columna_destino]
-    cmp r13,1
-    jg inicio
-    cmp r13,-1
-    jl inicio
+    mov r13,[columna_destino]
+    sub r13,[r10]
+    imul r13,r13
 
-    or r12,r13
-    jz inicio
+    add r12,r13
 
+    cmp r12, 1
+    je  mover_zorro
+    cmp r12, 2
+    je  mover_zorro
+    cmp r12, 4
+    je  validar_salto
+    cmp r12, 8
+    je  validar_salto
+
+    jmp inicio
+
+validar_salto:
+    mov r8,2
+    mov r10,[direc_fila_zorro]
+    mov r12,[fila_destino]
+    add r12,[r10]
+    
+    mov r10,[direc_columna_zorro]
+    mov r13,[columna_destino]
+    add r13,[r10]
+
+    xor rax,rax
+    xor rdx,rdx
+
+    mov rax,r12
+    idiv r8
+    mov [fila_salto],rax
+
+    mov rax,r13
+    idiv r8
+    mov [columna_salto],rax
+
+    buscarPosicion fila_salto,columna_salto,LONG_ELEMEN,CANT_COL
+    mov r10,[direc_tablero]
+    add r10,rdx
+    mCMPSB r10,espacio,1
+    je inicio
+    
+comer_oca:
+    _movsb espacio,[direc_tablero],rdx,1
+    inc qword[comio_oca?]
+    
 mover_zorro:
     buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
     _movsb [direc_caracter_zorro], [direc_tablero], rdx, 1
@@ -82,7 +121,7 @@ actualizar_posicion_zorro:
     mov rdi,[columna_destino]
     mov rsi,[direc_columna_zorro]
     mov [rsi],rdi
-    jmp fin_turno
 
 fin_turno:
+    mov rbx,[comio_oca?]
     ret
