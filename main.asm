@@ -8,6 +8,7 @@ section         .data
     cdm_clear           db      "clear",0             
 
     ; relacionado al tablero
+    tablero             db      "  OOO    OOO  OOOOOOOO     OO  X  O              ",0
     CANT_COL            dq      7
     LONG_ELEMEN         dq      1
     posCol_zorro        dq      4
@@ -23,7 +24,7 @@ section         .data
     mensaje_Final       db      "Saliendo del programa. Gracias por jugar.",0
 
 section         .bss
-    tablero         times 49        resb    1
+    ; tablero         times 49        resb    1
     volver_a_jugar                  resb    1
     eleccion                        resq    1
 
@@ -41,13 +42,15 @@ main:
     cmp         rax,2
     je          llamar_configuracion
 
-    mov         rdi,1
-    mov         rsi,tablero
-    lea         rdx,[zorro]
-    lea         rcx,[ocas]
-    sub         rsp, 8
-    call        Actividad_Tablero
-    add         rsp, 8
+
+
+    ; mov         rdi,1
+    ; mov         rsi,tablero
+    ; lea         rdx,[zorro]
+    ; lea         rcx,[ocas]
+    ; sub         rsp, 8
+    ; call        Actividad_Tablero
+    ; add         rsp, 8
 
 gameplay:
     mSystem cdm_clear
@@ -106,21 +109,12 @@ corroborar_acorralamiento:
     mov rdi,tablero
     mov rsi,[posFil_zorro]
     mov rdx,[posCol_zorro]
-    mov rcx,1
     sub rsp,8
     call condicion_de_fin
     add rsp,8
 
     cmp rax,1
     je  gameplay
-
-    mov rdi,tablero
-    mov rsi,[posFil_zorro]
-    mov rdx,[posCol_zorro]
-    mov rcx,2
-    sub rsp,8
-    call condicion_de_fin
-    add rsp,8
     
     cmp rax,1
     je  gameplay

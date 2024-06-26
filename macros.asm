@@ -87,5 +87,4 @@
     ; deja el desplazamiento en el rdx
 %endmacro
 
-
 extern puts,gets,system,sscanf,printf

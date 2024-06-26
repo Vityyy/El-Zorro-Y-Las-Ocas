@@ -11,31 +11,34 @@ section .bss
     direc_tablero         resq 1
     fila_zorro            resq 1
     columna_zorro         resq 1
-    
-    step                  resq 1
     fila_actual           resq 1
     columna_actual        resq 1
+    fila_aux              resq 1
+    columna_aux           resq 1
 
 section .text
 condicion_de_fin:
     mov [direc_tablero],rdi
     mov [fila_zorro],rsi
     mov [columna_zorro],rdx
-    mov [step],rcx
 
 inicializacion:
     mov rax,[fila_zorro]
-    sub rax,[step]
+    dec rax
     mov [fila_actual],rax
 
     mov rax,[columna_zorro]
-    sub rax,[step]
+    dec rax
     mov [columna_actual],rax
 
     mov rbx, 3
 
 esta_dentro_de_tablero?:
-    jmp validar_rango
+    sub rsp,8
+    call validar_rango
+    add rsp,8
+    cmp rax,1
+    jl  mover_columna
     
 hay_movimiento_valido?:    
     buscarPosicion fila_actual,columna_actual,LONG_ELEMEN,CANT_COL
@@ -43,27 +46,55 @@ hay_movimiento_valido?:
     add r10,rdx
     mCMPSB r10,espacio,1
     je continua_juego
-    
+
+hay_salto_valido?:
+    mov r12,[fila_actual]
+    mov [fila_aux],r12
+    sub r12,[fila_zorro]
+    add [fila_actual],r12
+
+    mov r13,[columna_actual]
+    mov [columna_aux],r13
+    sub r13,[columna_zorro]
+    add [columna_actual],r13
+
+    sub rsp,8
+    call validar_rango
+    add rsp,8
+
+    cmp rax,1
+    jl  devolver_valores
+
+    buscarPosicion fila_actual,columna_actual,LONG_ELEMEN,CANT_COL
+    mov r10,[direc_tablero]
+    add r10,rdx
+    mCMPSB r10,espacio,1
+    je continua_juego
+
+devolver_valores:
+    mov r12,[fila_aux]
+    mov [fila_actual],r12
+    mov r13,[columna_aux]
+    mov [columna_actual],r13
+
 mover_columna:
     dec rbx
-    mov rax,[step]
-    add [columna_actual],rax
+    inc qword[columna_actual]
     cmp rbx,0
     jne esta_dentro_de_tablero?
 
 mover_fila:
     mov rbx, 3
     
-    mov rax,[step]
-    add [fila_actual],rax
+    inc qword[fila_actual]
 
     mov rax,[columna_zorro]
-    sub rax,[step]
+    dec rax
     mov [columna_actual],rax
 
     mov rax,[fila_actual]
     sub rax,[fila_zorro]
-    cmp rax,[step]
+    cmp rax,1
     jg  termina_juego 
 
     jmp esta_dentro_de_tablero?
@@ -78,10 +109,10 @@ termina_juego:
 
 validar_rango:
     cmp     qword[fila_actual], 7
-    jg      mover_columna
+    jg      invalido
 
     cmp     qword[columna_actual], 7
-    jg      mover_columna
+    jg      invalido
 
     cmp     qword[columna_actual], 3
     jl      filaCortada
@@ -89,16 +120,24 @@ validar_rango:
     cmp     qword[columna_actual], 5
     jg      filaCortada
 
-    jmp     hay_movimiento_valido?
+    mov     rax,1
+    jmp     fin_validacion
 
 filaCortada:
     cmp     qword[fila_actual], 3
-    jl      mover_columna
+    jl      invalido
 
     cmp     qword[fila_actual], 5
-    jg      mover_columna
+    jg      invalido
     
-    jmp     hay_movimiento_valido?
+    mov     rax,1
+    jmp     fin_validacion
+
+invalido:
+    mov rax,0
+
+fin_validacion:
+    ret
 
 fin:
     ret

@@ -18,8 +18,8 @@ section .data
     textColumna                     db      "C",0
     mostrarIndicador                db      " %c%li",0
     separadorVertical               db      "|",0
-    separadorHorizontal             db      "----------------------------",10,0
-    separadorHorizontalCortado      db      "       -------------        ",10,0
+    separadorHorizontal             db      "    ----------------------------",10,0
+    separadorHorizontalCortado      db      "           -------------        ",10,0
     saltoLinea                      db      "",10,0
     ;posicion inicial del Zorro
     zorroPosColInicial        dq      4
@@ -128,14 +128,14 @@ orientacion_vertical:
     mov         qword[posFil], 8
 
 mostrarTablero:    
-    cmp             qword[posFil], 0
-    je              identificarColumnas
+    cmp         qword[posFil], 0
+    je          identificarColumnas
 
-    cmp             qword[posFil], 8
-    je              identificarColumnas
+    cmp         qword[posFil], 8
+    je          identificarColumnas
 
-    cmp             qword[posCol], 1
-    jg              mostrarPosicion
+    cmp         qword[posCol], 1
+    jg          mostrarPosicion
 
     mov         rdi, mostrarIndicador
     mov         rsi, [textFila]
