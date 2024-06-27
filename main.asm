@@ -1,7 +1,7 @@
 %include "macros.asm"
 
 global          main
-extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin
+extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin,validador_rango
 
 section         .data
     ; system

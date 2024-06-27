@@ -27,10 +27,10 @@ configuracion_tablero:
     mPuts   textConfiguracion
     mGets   eleccionConfiguracion
 
-    mCMPSB respuestaNegativa,eleccionConfiguracion,2
+    mCMPSB respuestaNegativa,eleccionConfiguracion,0,2
     je          Sin_cambios
 
-    mCMPSB eleccionConfiguracion,respuestaAfirmativa,2
+    mCMPSB eleccionConfiguracion,respuestaAfirmativa,0,2
     jne         configuracion_tablero
 
     ; El usuario quiere cambiar la configuracion
@@ -67,7 +67,7 @@ configurarOcas:
     je      configurarOcas
 
     ;caso particular para que los simbolos de ambos no sean iguales
-    mCMPSB configuracion, zorro, 1
+    mCMPSB configuracion, zorro, 0, 1
     je          configurarOcas
 
     _movsb configuracion, ocas, 0, 1
@@ -81,11 +81,11 @@ validar_input:
     jne     fin_validacion
 
     ;verifico que lo que puso el usuario no sea un espacio (" ")
-    mCMPSB espacio, configuracion, 1
+    mCMPSB espacio, configuracion, 0, 1
     je          fin_validacion
 
     ;verifico que lo que puso el usuario no sea un vacío ("")
-    mCMPSB vacio, configuracion, 1
+    mCMPSB vacio, configuracion, 0, 1
     je          fin_validacion
 
 input_valido:

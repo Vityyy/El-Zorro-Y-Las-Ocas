@@ -1,6 +1,7 @@
 %include "macros.asm"
 
 global validador_formato
+extern validador_rango
 
 section .data
     salir_programa           db "-1",0
@@ -42,13 +43,13 @@ mensaje_seleccion_ocas:
     je  fin_validacion
 
     mov rcx,-1
-caso_particular:       
+caso_particular_ocas:       
     inc rcx            
     mov dl,[coordenada_multiple + rcx]
     cmp dl,0
-    jne caso_particular
+    jne caso_particular_ocas
 
-    cmp rcx,7
+    cmp rcx,7 
     jne mensaje_seleccion_ocas
     
     _movsb coordenada_multiple,posicion_oca,0,3
@@ -94,7 +95,7 @@ mensaje_moverse_zorro:
     mov rdi,[coordenada_seleccionada_destino]
     mov rsi,fila_destino
     mov rdx,columna_destino
-    
+
     sub rsp,8
     call validador 
     add rsp,8
@@ -105,10 +106,10 @@ mensaje_moverse_zorro:
 fin_validacion:
     mov rdi,[fila_destino]
     mov rsi,[columna_destino]
-    ret
+    ret ;return de la rutina externa
 ;**********************************************************************
 ;valida el formato de la entrada y que no este fuera del tablero
-;devuelve -1 si es fin de programa, 0 si la entrada es invalida, 1 si es valida
+;0 si la entrada es invalida, 1 si es valida
 
 validador:
     mov [coordenada_seleccionada],rdi
@@ -118,7 +119,6 @@ validador:
 
 validar_input:
     inc rcx
-    ; mov r10,[coordenada_seleccionada]
     mov dl,[coordenada_seleccionada + rcx]
     cmp dl,0
     jne validar_input
@@ -127,8 +127,7 @@ validar_input:
     jne input_invalido
 
 validar_tipo:
-    ; mov r10,[coordenada_seleccionada]
-    mCMPSB coma,coordenada_seleccionada+1,1
+    mCMPSB coma,coordenada_seleccionada+1,0,1
     jne input_invalido
 
     mSscanf coordenada_seleccionada, formato, [fila]
@@ -140,45 +139,27 @@ validar_tipo:
     jl input_invalido
 
 validar_rango:
-    mov r10,[fila]
-    mov r11,[columna]
+    mov r12,[fila]
+    mov r13,[columna]
+    mov rdi,[r12]
+    mov rsi,[r13]
+    sub rsp,8
+    call validador_rango
+    add rsp,8
 
-    cmp     qword[r10], 7
-    jg      input_invalido
+    cmp rax,1
+    je  fin_validador_interno
 
-    cmp     qword[r11], 7
-    jg      input_invalido
-
-    cmp     qword[r11], 3
-    jl      filaCortada
-
-    cmp     qword[r11], 5
-    jg      filaCortada
-
-    mov     rax,1
-    jmp     fin_validador_interno
-
-filaCortada:
-    cmp     qword[r10], 3
-    jl      input_invalido
-
-    cmp     qword[r10], 5
-    jg      input_invalido
-    
-    mov     rax,1
-    jmp     fin_validador_interno
-    
 input_invalido:
     mPuts mensaje_invalido
-    mov     rax,0
+    mov rax,0
 
 fin_validador_interno:
     ret
     
 validar_exit:
     mov     [coordenada_seleccionada],rdi
-    xor     rax,rax
-    mCMPSB salir_programa,coordenada_seleccionada,3
+    mCMPSB  salir_programa,coordenada_seleccionada,0,3
     jne     fin_validar_exit
     mov     rax,-1
     

@@ -44,9 +44,7 @@ inicio:
 
 validar_colision:
     buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
-    mov r10,[direc_tablero]
-    add r10,rdx
-    mCMPSB r10,espacio,1
+    mCMPSB espacio,[direc_tablero],rdx,1
     jne inicio
 
 validar_movimiento:
@@ -95,9 +93,7 @@ validar_salto:
     mov [columna_salto],rax
 
     buscarPosicion fila_salto,columna_salto,LONG_ELEMEN,CANT_COL
-    mov r10,[direc_tablero]
-    add r10,rdx
-    mCMPSB r10,espacio,1
+    mCMPSB espacio,[direc_tablero],rdx,1
     je inicio
     
 comer_oca:

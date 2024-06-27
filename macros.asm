@@ -51,16 +51,18 @@
     rep     movsb
 
 %endmacro
-%macro mCMPSB 3
+%macro mCMPSB 4
     ;   %1 ->    direccion del string origen
     ;   %2 ->    direccion del string destino
-    ;   %3 ->    bytes a comparar
+    ;   %3 ->    desplazamiento,en caso de querer comparar a partir de un byte en particular
+    ;   %4 ->    bytes a comparar
     xor         rsi, rsi
     xor         rdi, rdi
 
     mov         rsi, %1
     mov         rdi, %2
-    mov         rcx, %3
+    add         rdi, %3
+    mov         rcx, %4
     repe        cmpsb
 
 %endmacro

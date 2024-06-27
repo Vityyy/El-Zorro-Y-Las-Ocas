@@ -39,16 +39,12 @@ seleccion:
     
 validar_existencia_oca:
     buscarPosicion fila_origen,columna_origen,LONG_ELEMEN,CANT_COL
-    mov r10,[direc_tablero]
-    add r10,rdx
-    mCMPSB r10,[direc_caracter_ocas],1
+    mCMPSB [direc_caracter_ocas],[direc_tablero],rdx,1
     jne input_invalido
 
     ; reviso si el destino es un espacio vacío
     buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
-    mov r10,[direc_tablero]
-    add r10,rdx
-    mCMPSB r10,espacio,1
+    mCMPSB espacio,[direc_tablero],rdx,1
     jne input_invalido
 
 validar_movimiento_permitido:

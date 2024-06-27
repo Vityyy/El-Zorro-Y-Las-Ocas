@@ -1,7 +1,7 @@
 %include "macros.asm"
 
 global condicion_de_fin
-
+extern validador_rango
 section .data
     CANT_COL              dq      7
     LONG_ELEMEN           dq      1
@@ -34,17 +34,18 @@ inicializacion:
     mov rbx, 3
 
 esta_dentro_de_tablero?:
+    mov rdi,[fila_actual]
+    mov rsi,[columna_actual]
     sub rsp,8
-    call validar_rango
+    call validador_rango
     add rsp,8
+
     cmp rax,1
     jl  mover_columna
     
 hay_movimiento_valido?:    
     buscarPosicion fila_actual,columna_actual,LONG_ELEMEN,CANT_COL
-    mov r10,[direc_tablero]
-    add r10,rdx
-    mCMPSB r10,espacio,1
+    mCMPSB espacio,[direc_tablero],rdx,1
     je continua_juego
 
 hay_salto_valido?:
@@ -58,17 +59,17 @@ hay_salto_valido?:
     sub r13,[columna_zorro]
     add [columna_actual],r13
 
+    mov rdi,[fila_actual]
+    mov rsi,[columna_actual]
     sub rsp,8
-    call validar_rango
+    call validador_rango
     add rsp,8
 
     cmp rax,1
     jl  devolver_valores
 
     buscarPosicion fila_actual,columna_actual,LONG_ELEMEN,CANT_COL
-    mov r10,[direc_tablero]
-    add r10,rdx
-    mCMPSB r10,espacio,1
+    mCMPSB espacio,[direc_tablero],rdx,1
     je continua_juego
 
 devolver_valores:
@@ -105,39 +106,6 @@ continua_juego:
 
 termina_juego:
     mov rax,0
-    jmp fin
-
-validar_rango:
-    cmp     qword[fila_actual], 7
-    jg      invalido
-
-    cmp     qword[columna_actual], 7
-    jg      invalido
-
-    cmp     qword[columna_actual], 3
-    jl      filaCortada
-
-    cmp     qword[columna_actual], 5
-    jg      filaCortada
-
-    mov     rax,1
-    jmp     fin_validacion
-
-filaCortada:
-    cmp     qword[fila_actual], 3
-    jl      invalido
-
-    cmp     qword[fila_actual], 5
-    jg      invalido
-    
-    mov     rax,1
-    jmp     fin_validacion
-
-invalido:
-    mov rax,0
-
-fin_validacion:
-    ret
 
 fin:
     ret
