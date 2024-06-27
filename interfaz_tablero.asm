@@ -7,13 +7,11 @@ section .data
     ; relacionado al tablero
     CANT_COL            dq      7
     LONG_ELEMEN         dq      1
-    orientacionTablero  dq      1
     posCol              dq      1
     posFil              dq      1
-    ;contadorAux         dq      0
+    
     ;imprimir por pantalla
     espacio                         db      " ",0
-    vacio                           db      "",0
     mostrarFicha                     db     " %c ", 0
     textFila                        db      "F",0
     textColumna                     db      "C",0
@@ -22,9 +20,6 @@ section .data
     separadorHorizontal             db      "    ----------------------------",10,0
     separadorHorizontalCortado      db      "           -------------        ",10,0
     saltoLinea                      db      "",10,0
-    ;posicion inicial del Zorro
-    zorroPosColInicial        dq      4
-    zorroPosFilInicial        dq      5
 
 section .bss
     direc_tablero        resq 1
@@ -42,7 +37,6 @@ Actividad_Tablero:
 
     mov         qword[posFil], 0
     mov         qword[posCol], 0
-    ; mov         qword[contadorAux], 0
     
 mostrarTablero:    
     cmp         qword[posFil], 0
@@ -117,7 +111,6 @@ separadorFilasCortado:
     mPrintf
 
 avanzarFila:
-    ;inc         qword[contadorAux]
     mov         qword[posCol], 1
     inc         qword[posFil]
 
