@@ -5,6 +5,7 @@ section .data
 section .bss
     fila_candidata    resq 1
     columna_candidata resq 1
+
 section .text
 validador_rango:
     mov [fila_candidata],rdi
@@ -41,4 +42,3 @@ invalido:
 
 fin_validacion:
     ret
-

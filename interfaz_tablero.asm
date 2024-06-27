@@ -1,6 +1,7 @@
 %include "macros.asm"
 
 global Actividad_Tablero
+extern validador_rango
 
 section .data
     ; relacionado al tablero
@@ -9,11 +10,11 @@ section .data
     orientacionTablero  dq      1
     posCol              dq      1
     posFil              dq      1
-    contadorAux         dq      0
+    ;contadorAux         dq      0
     ;imprimir por pantalla
     espacio                         db      " ",0
     vacio                           db      "",0
-    mostrarFicha                     db      " %c ", 0
+    mostrarFicha                     db     " %c ", 0
     textFila                        db      "F",0
     textColumna                     db      "C",0
     mostrarIndicador                db      " %c%li",0
@@ -27,9 +28,6 @@ section .data
 
 section .bss
     direc_tablero        resq 1
-    direc_caracter_zorro resq 1
-    direc_caracter_ocas  resq 1
-    
 section .text
 
 ;rutina externa Actividad_Tablero la cual se encarga de iniciaizar el tablero
@@ -40,98 +38,14 @@ section .text
     ;            rcx: direccion del caracter de la oca
     
 Actividad_Tablero:
-    mov [direc_tablero],rsi
-    mov [direc_caracter_zorro],rdx
-    mov [direc_caracter_ocas],rcx
+    mov         [direc_tablero],rdi
 
-    cmp rdi,1
-    je inicializarTablero
-    
     mov         qword[posFil], 0
     mov         qword[posCol], 0
-    mov         qword[contadorAux], 0
-    jmp mostrarTablero
+    ; mov         qword[contadorAux], 0
     
-inicializarTablero:
-    ;subrutina que deja el tablero en su estdo inicial
-    
-ubicarOcas:
-    ;UBICO LAS OCAS
-    sub             rsp, 8
-    call            validarPosicion
-    add             rsp, 8
-    
-    ;si rbx = 1 significa que la posicion está fuera del rango del tablero
-    cmp         rbx, 1
-    je          espacioVacio
-    cmp         qword[posFil], 3
-    jle         ponerOcas
-    cmp         qword[posFil], 5
-    jle         ocasEnEsquinas
-    
-espacioVacio:
-    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
-
-    _movsb      espacio, [direc_tablero], rdx ,1   
-    _movsb      espacio, [direc_tablero], rdx, 1   
-
-    jmp         avanzarInicializacion
-
-ocasEnEsquinas:
-    cmp         qword[posCol],1
-    je          ponerOcas
-    cmp         qword[posCol], 7
-    je          ponerOcas
-    jmp         espacioVacio
-    
-ponerOcas:
-    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
-
-    _movsb      [direc_caracter_ocas], [direc_tablero], rdx, 1
-    _movsb      [direc_caracter_ocas], [direc_tablero], rdx, 1
-
-avanzarInicializacion:
-    inc         qword[posCol]
-    cmp         qword[posCol], 7
-    jle         ubicarOcas
-    mov         qword[posCol], 1
-    inc         qword[posFil]    
-    cmp         qword[posFil], 7
-    jle         ubicarOcas
-    mov         qword[posFil], 1
-
-    buscarPosicion     zorroPosFilInicial, zorroPosColInicial, LONG_ELEMEN, CANT_COL
-
-    _movsb      [direc_caracter_zorro], [direc_tablero], rdx, 1
-    _movsb      [direc_caracter_zorro], [direc_tablero], rdx, 1
-    
-    ;return de inicializacion
-    jmp         fin
-;**********************************************************************
-
-iniciar_mostrarTablero:     
-    ; veo la posible orientacion de las filas
-    cmp         qword[orientacionTablero], 2
-    jle         orientacion_vertical
-
-orientacion_horizontal:
-    cmp         qword[orientacionTablero], 3
-    je          mostrarTablero
-
-    mov         qword[posFil], 8
-    jmp         mostrarTablero
-
-orientacion_vertical:
-    cmp         qword[orientacionTablero], 1
-    je          mostrarTablero
-
-    mov         qword[posFil], 8
-
 mostrarTablero:    
     cmp         qword[posFil], 0
-    je          identificarColumnas
-
-    cmp         qword[posFil], 8
     je          identificarColumnas
 
     cmp         qword[posCol], 1
@@ -146,17 +60,19 @@ mostrarTablero:
 
 mostrarPosicion:
 
-    buscarPosicion      posFil, posCol, LONG_ELEMEN, CANT_COL
+    buscarPosicion  posFil, posCol, LONG_ELEMEN, CANT_COL
     mov             rdi, mostrarFicha
     mov             r10,[direc_tablero]
     mov             rsi, [r10 + rdx]
     mPrintf
 
+    mov             rdi,[posFil]
+    mov             rsi,[posCol]
     sub             rsp, 8
-    call            validarPosicion
+    call            validador_rango
     add             rsp, 8
     
-    cmp             rbx, 0
+    cmp             rax, 1
     je              separadorColumnas
 
     cmp             qword[posCol], 2
@@ -185,10 +101,10 @@ avanzarMostrarTablero:
     mov         rdi, saltoLinea
     mPrintf
 
-    cmp         qword[contadorAux], 2
+    cmp         qword[posFil], 2
     jl         separadorFilasCortado
     
-    cmp         qword[contadorAux], 6
+    cmp         qword[posFil], 6
     jge         separadorFilasCortado
 
     mov         rdi, separadorHorizontal
@@ -201,57 +117,12 @@ separadorFilasCortado:
     mPrintf
 
 avanzarFila:
-    inc         qword[contadorAux]
+    ;inc         qword[contadorAux]
     mov         qword[posCol], 1
-
-    cmp         qword[orientacionTablero], 2
-    je          decrementarFila
-
     inc         qword[posFil]
+
     cmp         qword[posFil], 7
     jle         mostrarTablero
-
-    jmp         fin
-decrementarFila:
-    dec         qword[posFil]
-    cmp         qword[posFil],1
-    jge         mostrarTablero
-    ; return de mostrarTablero
-    jmp         fin
-;***************************************************************************
-
-validarPosicion:
-    ; guarda en el rdx:
-    ; -> 1 en caso de que la posicion no sea válida
-    ; -> 0 en caso de que sea válida
-    cmp         qword[posFil], 7
-    jg          invalido
-    cmp         qword[posCol], 7
-    jg          invalido
-    cmp         qword[posCol], 3
-    jl          filaCortada
-    cmp         qword[posCol], 5
-    jg          filaCortada
-    jmp         valido
-
-filaCortada:
-    cmp         qword[posFil], 3
-    jl          invalido
-    cmp         qword[posFil], 5
-    jg          invalido
-    jmp         valido
-
-invalido:
-    mov         rbx, 1
-    jmp         finValidacion
-
-valido:
-    mov         rbx, 0
-    jmp         finValidacion
-
-finValidacion:
-    ;return de validacion
-    ret
 
 fin:
     ret

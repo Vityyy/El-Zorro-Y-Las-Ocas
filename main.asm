@@ -8,11 +8,14 @@ section         .data
     cdm_clear           db      "clear",0             
 
     ; relacionado al tablero
-    tablero             db      "  OOO    OOO  OOOOOOOO     OO  X  O              ",0
+    tablero_default             db      "  OOO    OOO  OOOOOOOO     OO  X  O              ",0 
     CANT_COL            dq      7
     LONG_ELEMEN         dq      1
     posCol_zorro        dq      4
     posFil_zorro        dq      5
+    fila_aux            dq      1
+    columna_aux            dq      1
+
 
     ; relacionado al juego
     zorro               db      "X",0
@@ -24,7 +27,7 @@ section         .data
     mensaje_Final       db      "Saliendo del programa. Gracias por jugar.",0
 
 section         .bss
-    ; tablero         times 49        resb    1
+    tablero         times 50        resb    1
     volver_a_jugar                  resb    1
     eleccion                        resq    1
 
@@ -42,23 +45,12 @@ main:
     cmp         rax,2
     je          llamar_configuracion
 
-
-
-    ; mov         rdi,1
-    ; mov         rsi,tablero
-    ; lea         rdx,[zorro]
-    ; lea         rcx,[ocas]
-    ; sub         rsp, 8
-    ; call        Actividad_Tablero
-    ; add         rsp, 8
+    _movsb tablero_default,tablero,0,50
 
 gameplay:
     mSystem cdm_clear
 
-    mov         rdi,2
-    mov         rsi,tablero
-    lea         rdx,[zorro]
-    lea         rcx,[ocas]
+    mov         rdi,tablero
     sub         rsp, 8
     call        Actividad_Tablero
     add         rsp, 8
@@ -80,10 +72,7 @@ gameplay:
     
     mSystem cdm_clear
     
-    mov         rdi,2
-    mov         rsi,tablero
-    lea         rdx,[zorro]
-    lea         rcx,[ocas]
+    mov         rdi,tablero
     sub         rsp, 8
     call        Actividad_Tablero
     add         rsp, 8
@@ -116,30 +105,16 @@ corroborar_acorralamiento:
     cmp rax,1
     je  gameplay
     
-    cmp rax,1
-    je  gameplay
-
     jmp ganan_ocas
 
 llamar_configuracion:
+    mov     rdi,tablero_default
+    mov     rsi,zorro
+    mov     rdx,ocas
+
     sub     rsp,8
-    ;Rutina externa que deja la direccion de los nuevos caracteres en el rax y rbx
-    ;Si el R10 es -1, no se realizaron cambios
     call    configuracion_tablero
     add     rsp,8
-
-    cmp     r10,-1
-    je      main
-
-    mov     rdi,zorro
-    mov     rsi,rax
-    mov     rcx,2
-    rep     movsb
-
-    mov     rdi,ocas
-    mov     rsi,rbx
-    mov     rcx,2
-    rep     movsb
 
     jmp     main
 
