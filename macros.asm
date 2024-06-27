@@ -35,6 +35,42 @@
     add rsp,8
 %endmacro
 
+%macro mFopen 2
+    mov rdi,%1
+    mov rsi,%2
+    sub rsp,8
+    call fopen
+    add rsp,8
+%endmacro
+
+%macro mFclose 1
+    mov rdi,%1
+    sub rsp,8
+    call fclose
+    add rsp,8
+%endmacro
+
+%macro mFread 4
+    mov rdi,%1
+    mov rsi,%2
+    mov rdx,%3
+    mov rcx,%4
+    sub rsp,8
+    call fread
+    add rsp,8
+%endmacro
+
+%macro mFwrite 4
+    mov rdi,%1
+    mov rsi,%2
+    mov rdx,%3
+    mov rcx,%4
+    sub rsp,8
+    call fwrite
+    add rsp,8
+    
+%endmacro
+
 %macro      _movsb      4
     ;   %1 ->    direccion del string origen
     ;   %2 ->    direccion del string destino
@@ -89,4 +125,4 @@
     ; deja el desplazamiento en el rdx
 %endmacro
 
-extern puts,gets,system,sscanf,printf
+extern puts,gets,system,sscanf,printf, fopen, fclose, fread, fwrite

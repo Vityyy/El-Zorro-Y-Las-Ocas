@@ -1,33 +1,34 @@
 %include "macros.asm"
 
 global          main
-extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin,validador_rango
+extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin,validador_rango, manejo_archivos
 
 section         .data
     ; system
     cdm_clear           db      "clear",0             
 
     ; relacionado al tablero
-    tablero_default             db      "  OOO    OOO  OOOOOOOO     OO  X  O              ",0 
+    tablero_default             db      "  OOO    OOO  OOOOOOOO     OO  X  O              " 
+    tablero            times 49 db " "
+    zorro                       db      "X"
+    ocas                        db      "O"
+    posCol_zorro                dq       4
+    posFil_zorro                dq       5
+    kills                       dq       0
+    movimientos        times 16 db       0      
+    turno                       db       0
+
     CANT_COL            dq      7
     LONG_ELEMEN         dq      1
-    posCol_zorro        dq      4
-    posFil_zorro        dq      5
-    fila_aux            dq      1
-    columna_aux            dq      1
-
 
     ; relacionado al juego
-    zorro               db      "X",0
-    ocas                db      "O",0
-    formato             db      "%li",0
-    kills               dq       0
-    mensaje_gana_zorro  db      "¡El zorro gana! ¿Quieres volver a jugar? [-1 = salir]",0
-    mensaje_ganan_ocas  db      "Las ocas ganan! ¿Quieres volver a jugar? [-1 = salir]",0
-    mensaje_Final       db      "Saliendo del programa. Gracias por jugar.",0
+    formato               db      "%li",0
+   
+    mensaje_gana_zorro    db      "¡El zorro gana! ¿Quieres volver a jugar? [-1 = salir]",0
+    mensaje_ganan_ocas    db      "¡Las ocas ganan! ¿Quieres volver a jugar? [-1 = salir]",0
+    mensaje_Final         db      "Saliendo del programa. Gracias por jugar.",0
 
 section         .bss
-    tablero         times 50        resb    1
     volver_a_jugar                  resb    1
     eleccion                        resq    1
 
@@ -42,10 +43,15 @@ main:
     call        mostrarMenu
     add         rsp,8
 
+    cmp         rax,3
+    je          cargar
+
     cmp         rax,2
     je          llamar_configuracion
 
-    _movsb tablero_default,tablero,0,50
+    _movsb tablero_default,tablero,0,49
+    mov qword[posFil_zorro],5
+    mov qword[posCol_zorro],4
 
 gameplay:
     mSystem cdm_clear
@@ -66,6 +72,8 @@ gameplay:
     cmp rax,-1
     je end_game
 
+    cmp rax,-2
+    je guardar
 
     cmp rbx,1
     je aumentar_score
@@ -85,6 +93,9 @@ gameplay:
 
     cmp rax,-1
     je end_game
+
+    cmp rax,-2
+    je guardar
 
     jmp corroborar_acorralamiento
 
@@ -117,6 +128,22 @@ llamar_configuracion:
     add     rsp,8
 
     jmp     main
+
+cargar:
+    mov rdi,0
+    mov rsi,tablero_default
+    sub rsp,8
+    call manejo_archivos
+    add rsp,8
+    jmp gameplay
+
+guardar:
+    mov rdi,1
+    mov rsi,tablero_default
+    sub rsp,8
+    call manejo_archivos
+    add rsp,8
+    jmp end_game
 
 gana_zorro:
     mPuts mensaje_gana_zorro

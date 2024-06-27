@@ -30,7 +30,7 @@ seleccion:
     add rsp,8
 
     cmp rax,-1
-    je  fin_turno
+    jle  fin_turno
 
     mov [fila_destino],rdi
     mov [columna_destino],rsi

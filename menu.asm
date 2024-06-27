@@ -3,7 +3,7 @@
 global mostrarMenu
 
 section .data
-    mensaje_menu           db "Bienvenido al juego del Zorro y las Ocas",10,"Presione el numero correspondiente a la accion requerida",10,"1-Jugar",10,"2-Opciones",0
+    mensaje_menu           db "Bienvenido al juego del Zorro y las Ocas",10,"Presione el numero correspondiente a la accion requerida",10,"1-Jugar",10,"2-Opciones",10,"3-Cargar partida",0
     formato                db "%li",0
     mensaje_Input_Invalido db "Input invalido, presione enter para volver",0
     cdm_clear              db "clear",0
@@ -30,7 +30,9 @@ mostrarMenu:
 
     cmp byte[numero_eleccion],2
     je  fin_del_menu
-    
+
+    cmp byte[numero_eleccion],3
+    je  fin_del_menu
 
 input_Invalido:
     mSystem cdm_clear

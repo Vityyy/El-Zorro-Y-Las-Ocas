@@ -5,6 +5,7 @@ extern validador_rango
 
 section .data
     salir_programa           db "-1",0
+    guardar_estado           db "-2",0
     espacio                  db " ",0
     coma                     db ",",0
     formato                  db "%li",0
@@ -40,6 +41,14 @@ mensaje_seleccion_ocas:
     add rsp,8
 
     cmp rax,-1
+    je  fin_validacion
+
+    mov rdi,[coordenada_multiple]
+    sub rsp,8
+    call validar_guardar
+    add rsp,8
+
+    cmp rax,-2
     je  fin_validacion
 
     mov rcx,-1
@@ -90,6 +99,14 @@ mensaje_moverse_zorro:
     add rsp,8
 
     cmp rax,-1
+    je  fin_validacion
+
+    mov rdi,[coordenada_seleccionada_destino]
+    sub rsp,8
+    call validar_guardar
+    add rsp,8
+
+    cmp rax,-2
     je  fin_validacion
 
     mov rdi,[coordenada_seleccionada_destino]
@@ -158,10 +175,21 @@ fin_validador_interno:
     ret
     
 validar_exit:
+    mov     rax,1
     mov     [coordenada_seleccionada],rdi
     mCMPSB  salir_programa,coordenada_seleccionada,0,3
     jne     fin_validar_exit
     mov     rax,-1
-    
+
 fin_validar_exit:
+    ret
+
+validar_guardar:
+    mov     rax,1
+    mov     [coordenada_seleccionada],rdi
+    mCMPSB  guardar_estado,coordenada_seleccionada,0,3
+    jne     fin_validar_exit
+    mov     rax,-2
+
+fin_validar_guardar:
     ret
