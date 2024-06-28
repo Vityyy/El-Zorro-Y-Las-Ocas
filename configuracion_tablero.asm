@@ -6,18 +6,16 @@ section .data
     LONG_ELEMEN                 dq      1
     CANT_COL                    dq      7
     cdm_clear                   db      "clear",0
-    textConfiguracion           db      "Deseas configurar la partida (s/n): ",0
     textConfiguracionZorro      db      "Escriba el caracter con el que quiere representar al zorro: ",0
     textConfiguracionOcas       db      "Escriba el caracter con el que quiere representar las ocas: ",0
-    respuestaAfirmativa         db      "s",0
-    respuestaNegativa           db      "n",0
+    textCaracterInvalido        db      "Caracter invalido, intente nuevamente",0
+    textCaracteresIguales       db      "Los caracteres no pueden ser iguales, intente nuevamente",0
     espacio                     db      " ",0
     vacio                       db      "",0
     fila                        dq      1
     columna                     dq      1
 
-section .bss
-    eleccionConfiguracion           resb    50      
+section .bss    
     configuracion                   resb    50
     zorro                           resb    1
     ocas                            resb    1
@@ -33,55 +31,49 @@ configuracion_tablero:
     mov [direc_caracter_ocas],rdx
 
 inicio:
-    ; limpio la pantalla
     mSystem cdm_clear
 
-    ; Pregunto al usuario si quiere configurar el juego
-    mPuts   textConfiguracion
-    mGets   eleccionConfiguracion
-
-    mCMPSB respuestaNegativa,eleccionConfiguracion,0,2
-    je          sin_cambios
-
-    mCMPSB eleccionConfiguracion,respuestaAfirmativa,0,2
-    jne         inicio
-
-    ; El usuario quiere cambiar la configuracion
-    ; CONFIGURACION DEL ZORRO
 configurarZorro:
-    ; limpio la pantalla
-    mSystem cdm_clear
 
     mPuts   textConfiguracionZorro
     mGets   configuracion
 
-    ; sub     rsp,8
     call validar_input
-    ; add     rsp,8
 
-    cmp     rax,-1
-    je      configurarZorro
+    cmp     rax,1
+    je      zorro_valido
 
+    mSystem cdm_clear
+    mPuts textCaracterInvalido
+    jmp configurarZorro
+    
+zorro_valido:
     _movsb  configuracion,zorro,0,1
-
-;CONFIGURACION DE LAS OCAS
-configurarOcas:
     mSystem cdm_clear
 
+configurarOcas:
     mPuts   textConfiguracionOcas
     mGets   configuracion
 
-    ; sub     rsp,8
     call validar_input
-    ; add     rsp,8
 
-    cmp     rax,-1
-    je      configurarOcas
+    cmp     rax,1
+    je      ocas_diferentes_a_zorro
 
+    mSystem cdm_clear
+    mPuts  textCaracterInvalido
+    jmp configurarOcas
+
+ocas_diferentes_a_zorro:
     ;caso particular para que los simbolos de ambos no sean iguales
     mCMPSB configuracion, zorro, 0, 1
-    je          configurarOcas
+    jne  ocas_validas
+    
+    mSystem cdm_clear
+    mPuts   textCaracteresIguales
+    jmp configurarOcas
 
+ocas_validas:
     _movsb configuracion, ocas, 0, 1
 
 modificar_tablero:
@@ -114,11 +106,7 @@ mover_fila:
     jl  modificar_tablero
 
     _movsb ocas,[direc_caracter_ocas],0,1
-    jmp finConfiguracion
-
-sin_cambios:
-    mov     r10,-1
-
+    
 finConfiguracion:
     add rsp,8
     ret

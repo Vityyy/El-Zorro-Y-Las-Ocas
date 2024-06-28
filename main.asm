@@ -1,15 +1,14 @@
 %include "macros.asm"
 
 global          main
-extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin,validador_rango, manejo_archivos
+extern          mostrarMenu,configuracion_tablero,mostrar_interfaz,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin,validador_rango, manejo_archivos
 
 section         .data
     cdm_clear           db      "clear",0             
 
     ; relacionado al tablero
-    ; contador_mov_default        db 0,-1,0,-1,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,-1,0,-1,0
     tablero_default             db      "  OOO    OOO  OOOOOOOO     OO  X  O              " 
-    tablero            times 49 db " "
+    tablero            times 49 db      " "
     zorro                       db      "X"
     ocas                        db      "O"
     posCol_zorro                dq       4
@@ -17,16 +16,15 @@ section         .data
     kills                       dq       0
     movimientos        times 25 db       0      
     turno                       db       0
-
-    CANT_COL            dq      7
-    LONG_ELEMEN         dq      1
+    contador_mov_default        db       0,-1,0,-1,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,-1,0,-1,0
 
     ; relacionado al juego
     formato               db      "%li",0
    
-    mensaje_gana_zorro    db      "¡El zorro gana! ¿Quieres volver a jugar? [-1 = salir]",0
-    mensaje_ganan_ocas    db      "¡Las ocas ganan! ¿Quieres volver a jugar? [-1 = salir]",0
-    mensaje_Final         db      "Saliendo del programa. Gracias por jugar.",0
+    mensaje_gana_zorro     db      "¡El zorro gana!",0
+    mensaje_ganan_ocas     db      "¡Las ocas ganan!",0
+    mensaje_volver_a_jugar db      "Si quiere volver al menu ingrese enter, para salir ingrese -1",0
+    mensaje_Final          db      "Saliendo del programa. Gracias por jugar.",0
 
 section         .bss
     volver_a_jugar                  resb    1
@@ -41,13 +39,16 @@ inicio:
 
     call        mostrarMenu
 
-    cmp         rax,3
-    je          cargar
-
     cmp         rax,2
     je          llamar_configuracion
 
-    ; _movsb contador_mov_default,movimientos,0,25
+    cmp         rax,3
+    je          cargar
+
+    cmp         rax,4
+    je          end_game
+
+    _movsb contador_mov_default,movimientos,0,25
     _movsb tablero_default,tablero,0,49
     mov qword[kills],0
     mov qword[posFil_zorro],5
@@ -61,12 +62,13 @@ turno_zorro:
     mSystem cdm_clear
 
     mov         rdi,tablero
-    call        Actividad_Tablero
+    call        mostrar_interfaz
 
     mov         rdi,tablero
     mov         rsi,zorro
     mov         rdx,posFil_zorro
     mov         rcx,posCol_zorro
+    mov         r8,movimientos
     call        jugar_zorro
 
     cmp rax,-1
@@ -84,7 +86,7 @@ turno_ocas:
     mSystem cdm_clear
     
     mov         rdi,tablero
-    call        Actividad_Tablero
+    call        mostrar_interfaz
 
     mov         rdi,tablero
     mov         rsi,ocas
@@ -127,6 +129,8 @@ cargar:
     mov rdi,0
     mov rsi,tablero_default
     call manejo_archivos
+    cmp rax,-1
+    je  inicio
     jmp gameplay
 
 guardar:
@@ -136,13 +140,25 @@ guardar:
     jmp gameplay
 
 gana_zorro:
+    mSystem cdm_clear
+    mov rdi,tablero
+    call mostrar_interfaz
     mPuts mensaje_gana_zorro
-    jmp jugar_de_nuevo?
+    jmp mostrar_stats
 
 ganan_ocas:
+    mSystem cdm_clear
+    mov rdi,tablero
+    call mostrar_interfaz
     mPuts mensaje_ganan_ocas
 
+mostrar_stats:
+    mov rdi,movimientos
+    mov rsi,2
+    call mostrar_interfaz
+
 jugar_de_nuevo?:
+    mPuts mensaje_volver_a_jugar
     mGets volver_a_jugar
     mSscanf volver_a_jugar,formato,eleccion
     cmp rax,1

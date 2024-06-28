@@ -2,6 +2,7 @@
 
 global condicion_de_fin
 extern validador_rango
+
 section .data
     CANT_COL              dq      7
     LONG_ELEMEN           dq      1

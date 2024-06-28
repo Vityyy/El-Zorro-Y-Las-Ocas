@@ -20,6 +20,12 @@ inicio:
     cmp     qword[columna_candidata], 7
     jg      invalido
 
+    cmp     qword[fila_candidata], 1
+    jl      invalido
+
+    cmp     qword[columna_candidata], 1
+    jl      invalido
+
     cmp     qword[columna_candidata], 3
     jl      filaCortada
 

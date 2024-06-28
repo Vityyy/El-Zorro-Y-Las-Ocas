@@ -7,8 +7,10 @@ section  .data
     LONG_ELEMEN           dq      1
     espacio               db  " ",0                 
     salir_programa        db "-1",0
+    mensaje_invalido      db "Movimiento ingresado invalida, intente nuevamente.",0
 
 section  .bss
+    movimientos             resq 1
     direc_caracter_zorro    resq 1
     direc_fila_zorro        resq 1                 ; Fila actual
     direc_columna_zorro     resq 1                 ; Columna actual
@@ -28,6 +30,7 @@ jugar_zorro:
     mov [direc_caracter_zorro],rsi
     mov [direc_fila_zorro],rdx
     mov [direc_columna_zorro],rcx
+    mov [movimientos],r8
     mov byte[comio_oca?],0
 
 inicio:
@@ -43,7 +46,7 @@ inicio:
 validar_colision:
     buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
     mCMPSB espacio,[direc_tablero],rdx,1
-    jne inicio
+    jne movimiento_invalido
 
 validar_movimiento:
     mov r10,[direc_fila_zorro]
@@ -59,18 +62,17 @@ validar_movimiento:
     add r12,r13
 
     cmp r12, 1
-    je  mover_zorro
+    je  contar_movimiento
     cmp r12, 2
-    je  mover_zorro
+    je  contar_movimiento
     cmp r12, 4
     je  validar_salto
     cmp r12, 8
     je  validar_salto
 
-    jmp inicio
+    jmp movimiento_invalido
 
 validar_salto:
-    mov r8,2
     mov r10,[direc_fila_zorro]
     mov r12,[fila_destino]
     add r12,[r10]
@@ -83,6 +85,7 @@ validar_salto:
     xor rdx,rdx
 
     mov rax,r12
+    mov r8,2
     idiv r8
     mov [fila_salto],rax
 
@@ -92,12 +95,23 @@ validar_salto:
 
     buscarPosicion fila_salto,columna_salto,LONG_ELEMEN,CANT_COL
     mCMPSB espacio,[direc_tablero],rdx,1
-    je inicio
+    je movimiento_invalido
     
 comer_oca:
     _movsb espacio,[direc_tablero],rdx,1
     inc qword[comio_oca?]
-    
+
+contar_movimiento:
+    mov r10,[direc_fila_zorro]
+    mov r12,[fila_destino]
+    sub r12,[r10]
+    mov r10,[direc_columna_zorro]
+    mov r13,[columna_destino]
+    sub r13,[r10]
+    contar_direccion r12,r13,1,5
+    mov r10,[movimientos]
+    inc byte[r10+rdx]
+
 mover_zorro:
     buscarPosicion fila_destino,columna_destino,LONG_ELEMEN,CANT_COL
     _movsb [direc_caracter_zorro], [direc_tablero], rdx, 1
@@ -120,3 +134,7 @@ fin_turno:
     mov rbx,[comio_oca?]
     add rsp,8
     ret
+
+movimiento_invalido:
+    mPuts mensaje_invalido
+    jmp inicio

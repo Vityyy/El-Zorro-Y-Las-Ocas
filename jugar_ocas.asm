@@ -6,7 +6,7 @@ section .data
     CANT_COL              dq  7
     LONG_ELEMEN           dq  1
     espacio               db " ",0
-    mensaje_invalido      db "Movimiento ingresado invalido, intente nuevamente",0
+    mensaje_invalido      db "Movimiento ingresado invalido, intente nuevamente.",0
 
 section .bss
     fila_origen             resq 1

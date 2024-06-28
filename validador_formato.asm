@@ -9,9 +9,9 @@ section .data
     espacio                  db " ",0
     coma                     db ",",0
     formato                  db "%li",0
-    mensaje_invalido         db "Coordenada ingresada invalida, intente nuevamente",0
-    mensaje_ocas             db "Ingrese la coordenada de la Oca a seleccionar y la coordenada donde deseada a moverse",0
-    mensaje_movimiento       db "Ingrese coordenada a la que desea moverse",0
+    mensaje_invalido         db "Formato invalido, intente nuevamente.",0
+    mensaje_ocas             db "Turno Ocas: Ingrese la coordenada de la Oca a seleccionar y la coordenada donde deseada a moverse. Presione -2 para guardar, -1 para salir.",0
+    mensaje_movimiento       db "Turno Zorro: Ingrese la coordenada a la que desea moverse. Presione -2 para guardar, -1 para salir.",0
 
 section .bss
     fila                    resq 1
