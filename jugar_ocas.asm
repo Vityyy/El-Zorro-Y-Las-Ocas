@@ -19,15 +19,13 @@ section .bss
 section .text
 
 jugar_ocas:
-
+    sub rsp,8
     mov [direc_tablero],rdi
     mov [direc_caracter_ocas],rsi
 
 seleccion:
     mov rdi,1
-    sub rsp,8
     call validador_formato
-    add rsp,8
 
     cmp rax,-1
     jle  fin_turno
@@ -88,4 +86,5 @@ borrar_posicion_anterior:
     _movsb espacio,[direc_tablero],rdx,1
     
 fin_turno:
+    add rsp,8
     ret

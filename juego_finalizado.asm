@@ -18,6 +18,7 @@ section .bss
 
 section .text
 condicion_de_fin:
+    sub rsp,8
     mov [direc_tablero],rdi
     mov [fila_zorro],rsi
     mov [columna_zorro],rdx
@@ -36,9 +37,7 @@ inicializacion:
 esta_dentro_de_tablero?:
     mov rdi,[fila_actual]
     mov rsi,[columna_actual]
-    sub rsp,8
     call validador_rango
-    add rsp,8
 
     cmp rax,1
     jl  mover_columna
@@ -61,9 +60,8 @@ hay_salto_valido?:
 
     mov rdi,[fila_actual]
     mov rsi,[columna_actual]
-    sub rsp,8
+    
     call validador_rango
-    add rsp,8
 
     cmp rax,1
     jl  devolver_valores
@@ -108,4 +106,5 @@ termina_juego:
     mov rax,0
 
 fin:
+    add rsp,8
     ret

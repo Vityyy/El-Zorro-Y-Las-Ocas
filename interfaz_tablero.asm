@@ -33,8 +33,8 @@ section .text
     ;            rcx: direccion del caracter de la oca
     
 Actividad_Tablero:
+    sub         rsp,8
     mov         [direc_tablero],rdi
-
     mov         qword[posFil], 0
     mov         qword[posCol], 0
     
@@ -62,9 +62,7 @@ mostrarPosicion:
 
     mov             rdi,[posFil]
     mov             rsi,[posCol]
-    sub             rsp, 8
     call            validador_rango
-    add             rsp, 8
     
     cmp             rax, 1
     je              separadorColumnas
@@ -118,4 +116,5 @@ avanzarFila:
     jle         mostrarTablero
 
 fin:
+    add         rsp,8
     ret

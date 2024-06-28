@@ -27,6 +27,7 @@ section .bss
 
 section .text
 configuracion_tablero:
+    sub rsp,8
     mov [direc_tablero],rdi
     mov [direc_caracter_zorro],rsi
     mov [direc_caracter_ocas],rdx
@@ -54,9 +55,9 @@ configurarZorro:
     mPuts   textConfiguracionZorro
     mGets   configuracion
 
-    sub     rsp,8
+    ; sub     rsp,8
     call validar_input
-    add     rsp,8
+    ; add     rsp,8
 
     cmp     rax,-1
     je      configurarZorro
@@ -70,9 +71,9 @@ configurarOcas:
     mPuts   textConfiguracionOcas
     mGets   configuracion
 
-    sub     rsp,8
+    ; sub     rsp,8
     call validar_input
-    add     rsp,8
+    ; add     rsp,8
 
     cmp     rax,-1
     je      configurarOcas
@@ -119,6 +120,7 @@ sin_cambios:
     mov     r10,-1
 
 finConfiguracion:
+    add rsp,8
     ret
 ;**********************************************************************
 

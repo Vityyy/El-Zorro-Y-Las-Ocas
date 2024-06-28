@@ -35,13 +35,11 @@ section         .bss
     ;configuracion del Juego
 section         .text
 main:
-    mSystem  cdm_clear
-
     sub         rsp,8
-    ;rutina externa que maneja la funcionalidad del menu
-    ;devuelve el resultado de la opcion escogida en el rax (numero)
+inicio:
+    mSystem  cdm_clear
+    
     call        mostrarMenu
-    add         rsp,8
 
     cmp         rax,3
     je          cargar
@@ -57,17 +55,13 @@ gameplay:
     mSystem cdm_clear
 
     mov         rdi,tablero
-    sub         rsp, 8
     call        Actividad_Tablero
-    add         rsp, 8
 
     mov         rdi,tablero
     mov         rsi,zorro
     mov         rdx,posFil_zorro
     mov         rcx,posCol_zorro
-    sub         rsp,8
     call        jugar_zorro
-    add         rsp,8
 
     cmp rax,-1
     je end_game
@@ -81,15 +75,11 @@ gameplay:
     mSystem cdm_clear
     
     mov         rdi,tablero
-    sub         rsp, 8
     call        Actividad_Tablero
-    add         rsp, 8
 
     mov         rdi,tablero
     mov         rsi,ocas
-    sub         rsp,8
     call        jugar_ocas
-    add         rsp,8
 
     cmp rax,-1
     je end_game
@@ -109,9 +99,7 @@ corroborar_acorralamiento:
     mov rdi,tablero
     mov rsi,[posFil_zorro]
     mov rdx,[posCol_zorro]
-    sub rsp,8
     call condicion_de_fin
-    add rsp,8
 
     cmp rax,1
     je  gameplay
@@ -122,27 +110,19 @@ llamar_configuracion:
     mov     rdi,tablero_default
     mov     rsi,zorro
     mov     rdx,ocas
-
-    sub     rsp,8
     call    configuracion_tablero
-    add     rsp,8
-
-    jmp     main
+    jmp     inicio
 
 cargar:
     mov rdi,0
     mov rsi,tablero_default
-    sub rsp,8
     call manejo_archivos
-    add rsp,8
     jmp gameplay
 
 guardar:
     mov rdi,1
     mov rsi,tablero_default
-    sub rsp,8
     call manejo_archivos
-    add rsp,8
     jmp end_game
 
 gana_zorro:
@@ -156,12 +136,13 @@ jugar_de_nuevo?:
     mGets volver_a_jugar
     mSscanf volver_a_jugar,formato,eleccion
     cmp rax,1
-    jl  main
+    jl  inicio
     cmp qword[eleccion],-1
-    jne main
+    jne inicio
 
 end_game:
     mSystem cdm_clear
     mPuts mensaje_Final
     ;fin de programa
+    add rsp,8
     ret

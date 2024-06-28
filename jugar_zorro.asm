@@ -23,7 +23,7 @@ section  .bss
 section  .text
 
 jugar_zorro:
-    
+    sub rsp,8
     mov [direc_tablero],rdi
     mov [direc_caracter_zorro],rsi
     mov [direc_fila_zorro],rdx
@@ -32,9 +32,7 @@ jugar_zorro:
 
 inicio:
     mov rdi,0
-    sub rsp,8
     call validador_formato
-    add rsp,8
 
     cmp rax,-1
     jle  fin_turno
@@ -120,4 +118,5 @@ actualizar_posicion_zorro:
 
 fin_turno:
     mov rbx,[comio_oca?]
+    add rsp,8
     ret

@@ -15,6 +15,8 @@ section .bss
     
 section .text
 mostrarMenu:
+    sub rsp,8
+inicio:
     mSystem cdm_clear
 
     mPuts mensaje_menu
@@ -40,11 +42,12 @@ input_Invalido:
     mPuts mensaje_Input_Invalido
     mGets solo_enter
     
-    jmp mostrarMenu
+    jmp inicio
 
 fin_del_menu:
     mSystem cdm_clear
     mov rax,[numero_eleccion]
+    add rsp,8
     ret
     
 

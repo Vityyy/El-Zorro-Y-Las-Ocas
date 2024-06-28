@@ -16,6 +16,7 @@ section .bss
 
 section .text
 manejo_archivos:
+    sub rsp,8
     mov [direc_tablero],rsi
     cmp rdi,1
     je  guardar
@@ -56,5 +57,6 @@ error:
     mov rax,0
     
 fin:
+    add rsp,8
     ret
     

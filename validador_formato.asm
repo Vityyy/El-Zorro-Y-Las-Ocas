@@ -28,6 +28,7 @@ section .bss
 section .text
 
 validador_formato:
+    sub rsp,8
     cmp rdi,0
     je  mensaje_moverse_zorro
 
@@ -36,17 +37,17 @@ mensaje_seleccion_ocas:
     mGets coordenada_multiple
 
     mov rdi,[coordenada_multiple]
-    sub rsp,8
+    ; sub rsp,8
     call validar_exit
-    add rsp,8
+    ; add rsp,8
 
     cmp rax,-1
     je  fin_validacion
 
     mov rdi,[coordenada_multiple]
-    sub rsp,8
+    ; sub rsp,8
     call validar_guardar
-    add rsp,8
+    ; add rsp,8
 
     cmp rax,-2
     je  fin_validacion
@@ -68,9 +69,9 @@ asignacion:
     mov rdi, [posicion_oca]
     mov rsi, fila_origen
     mov rdx, columna_origen
-    sub rsp,8
+    ; sub rsp,8
     call validador 
-    add rsp,8
+    ; add rsp,8
     
     cmp rax,0
     je mensaje_seleccion_ocas
@@ -78,9 +79,9 @@ asignacion:
     mov rdi, [coordenada_seleccionada_destino]
     mov rsi, fila_destino
     mov rdx, columna_destino
-    sub rsp,8
+    ; sub rsp,8
     call validador 
-    add rsp,8
+    ; add rsp,8
     
     cmp rax,0
     je mensaje_seleccion_ocas
@@ -94,17 +95,17 @@ mensaje_moverse_zorro:
     mGets coordenada_seleccionada_destino
 
     mov rdi,[coordenada_seleccionada_destino]
-    sub rsp,8
+    ; sub rsp,8
     call validar_exit
-    add rsp,8
+    ; add rsp,8
 
     cmp rax,-1
     je  fin_validacion
 
     mov rdi,[coordenada_seleccionada_destino]
-    sub rsp,8
+    ; sub rsp,8
     call validar_guardar
-    add rsp,8
+    ; add rsp,8
 
     cmp rax,-2
     je  fin_validacion
@@ -113,9 +114,9 @@ mensaje_moverse_zorro:
     mov rsi,fila_destino
     mov rdx,columna_destino
 
-    sub rsp,8
+    ; sub rsp,8
     call validador 
-    add rsp,8
+    ; add rsp,8
 
     cmp rax,0
     je mensaje_moverse_zorro
@@ -123,12 +124,14 @@ mensaje_moverse_zorro:
 fin_validacion:
     mov rdi,[fila_destino]
     mov rsi,[columna_destino]
+    add rsp,8
     ret ;return de la rutina externa
 ;**********************************************************************
 ;valida el formato de la entrada y que no este fuera del tablero
 ;0 si la entrada es invalida, 1 si es valida
 
 validador:
+    sub rsp,8
     mov [coordenada_seleccionada],rdi
     mov [fila],rsi
     mov [columna],rdx
@@ -160,9 +163,9 @@ validar_rango:
     mov r13,[columna]
     mov rdi,[r12]
     mov rsi,[r13]
-    sub rsp,8
+    ; sub rsp,8
     call validador_rango
-    add rsp,8
+    ; add rsp,8
 
     cmp rax,1
     je  fin_validador_interno
@@ -172,6 +175,7 @@ input_invalido:
     mov rax,0
 
 fin_validador_interno:
+    add rsp,8
     ret
     
 validar_exit:
