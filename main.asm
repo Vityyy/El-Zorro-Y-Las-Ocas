@@ -4,10 +4,10 @@ global          main
 extern          mostrarMenu,configuracion_tablero,Actividad_Tablero,jugar_zorro,validador_formato,jugar_ocas,condicion_de_fin,validador_rango, manejo_archivos
 
 section         .data
-    ; system
     cdm_clear           db      "clear",0             
 
     ; relacionado al tablero
+    ; contador_mov_default        db 0,-1,0,-1,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,-1,0,-1,0
     tablero_default             db      "  OOO    OOO  OOOOOOOO     OO  X  O              " 
     tablero            times 49 db " "
     zorro                       db      "X"
@@ -15,7 +15,7 @@ section         .data
     posCol_zorro                dq       4
     posFil_zorro                dq       5
     kills                       dq       0
-    movimientos        times 16 db       0      
+    movimientos        times 25 db       0      
     turno                       db       0
 
     CANT_COL            dq      7
@@ -38,7 +38,7 @@ main:
     sub         rsp,8
 inicio:
     mSystem  cdm_clear
-    
+
     call        mostrarMenu
 
     cmp         rax,3
@@ -47,11 +47,17 @@ inicio:
     cmp         rax,2
     je          llamar_configuracion
 
+    ; _movsb contador_mov_default,movimientos,0,25
     _movsb tablero_default,tablero,0,49
+    mov qword[kills],0
     mov qword[posFil_zorro],5
     mov qword[posCol_zorro],4
 
 gameplay:
+    cmp byte[turno],0
+    jne turno_ocas
+
+turno_zorro:
     mSystem cdm_clear
 
     mov         rdi,tablero
@@ -72,6 +78,9 @@ gameplay:
     cmp rbx,1
     je aumentar_score
     
+    mov byte[turno],1
+
+turno_ocas:
     mSystem cdm_clear
     
     mov         rdi,tablero
@@ -87,13 +96,14 @@ gameplay:
     cmp rax,-2
     je guardar
 
+    mov byte[turno],0
     jmp corroborar_acorralamiento
 
 aumentar_score:
     inc qword[kills]
     cmp qword[kills],12
     je  gana_zorro
-    jmp gameplay
+    jmp turno_zorro
 
 corroborar_acorralamiento:
     mov rdi,tablero
@@ -102,7 +112,7 @@ corroborar_acorralamiento:
     call condicion_de_fin
 
     cmp rax,1
-    je  gameplay
+    je  turno_zorro
     
     jmp ganan_ocas
 
@@ -123,7 +133,7 @@ guardar:
     mov rdi,1
     mov rsi,tablero_default
     call manejo_archivos
-    jmp end_game
+    jmp gameplay
 
 gana_zorro:
     mPuts mensaje_gana_zorro

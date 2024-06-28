@@ -32,7 +32,7 @@ cargar:
     mov qword[id_archivo],rax
 
 leer:
-    mFread [direc_tablero],141,1,[id_archivo]
+    mFread [direc_tablero],150,1,[id_archivo]
     jmp cerrar_archivo
 
 guardar:
@@ -46,7 +46,7 @@ guardar:
     mov qword[id_archivo],rax
 
 escribir:
-    mFwrite [direc_tablero],141,1,[id_archivo]
+    mFwrite [direc_tablero],150,1,[id_archivo]
 
 cerrar_archivo:
     mFclose [id_archivo]
