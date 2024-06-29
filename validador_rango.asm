@@ -7,6 +7,8 @@ section .bss
     columna_candidata resq 1
 
 section .text
+
+; Verifica que la fila y la columna pertenezcan al tablero. En caso afirmativo, devuelve 1, en caso contrario, 0.
 validador_rango:
     mov [fila_candidata],rdi
     mov [columna_candidata],rsi

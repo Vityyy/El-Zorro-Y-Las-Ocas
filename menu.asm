@@ -14,8 +14,12 @@ section .bss
     numero_eleccion  resb 20 
     
 section .text
+
+; Rutina que muestra el menu al jugador, procesa su elección numérica y la deja en el rax. Filtra inputs inválidos.
+
 mostrarMenu:
     sub rsp,8
+
 inicio:
     mSystem cdm_clear
 

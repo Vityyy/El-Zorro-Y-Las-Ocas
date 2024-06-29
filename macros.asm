@@ -52,6 +52,7 @@
     
 %endmacro
 
+; Copia un string de %1 a %2, con %3 bytes de desplazamiento y %4 bytes a copiar
 %macro      _movsb      4
     ;   %1 ->    direccion del string origen
     ;   %2 ->    direccion del string destino
@@ -74,6 +75,7 @@
     ;   %2 ->    direccion del string destino
     ;   %3 ->    desplazamiento,en caso de querer comparar a partir de un byte en particular
     ;   %4 ->    bytes a comparar
+
     xor         rsi, rsi
     xor         rdi, rdi
 
@@ -85,6 +87,7 @@
 
 %endmacro
 
+; Busca la posición fil,col del tablero y devuelve el desplazamiento a hacer en el rdx
 %macro      buscarPosicion 4
     ; %1 = fil
     ; %2 = col
@@ -107,6 +110,7 @@
     ; deja el desplazamiento en el rdx
 %endmacro
 
+; Cuenta hacia donde se mueve el zorro. Lo que queda en el rdx es el desplazamiento en la matriz sumatoria
 %macro contar_direccion 4
     ; %1 = fil
     ; %2 = col

@@ -40,6 +40,7 @@ esta_dentro_de_tablero?:
     mov rsi,[columna_actual]
     call validador_rango
 
+    ; si está fuera del rango, mueve columna
     cmp rax,1
     jl  mover_columna
     
@@ -64,6 +65,7 @@ hay_salto_valido?:
     
     call validador_rango
 
+    ; si el rango es inválido...
     cmp rax,1
     jl  devolver_valores
 

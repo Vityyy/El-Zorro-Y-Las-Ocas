@@ -113,6 +113,7 @@ corroborar_acorralamiento:
     mov rdx,[posCol_zorro]
     call condicion_de_fin
 
+    ; si el rax tiene 1, el zorro no fue acorralado
     cmp rax,1
     je  turno_zorro
     
